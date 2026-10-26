@@ -1,0 +1,35 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#080d17">
+    <title>{% block title %}Telix ShipShield{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/shipshield.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+<header class="topbar">
+    <div class="shell topbar-inner">
+        <a class="brand" href="{% if user.is_authenticated %}{% url 'projects:dashboard' %}{% else %}{% url 'login' %}{% endif %}">
+            <span class="brand-mark" aria-hidden="true">⬡</span>
+            <span>Telix ShipShield<small>PROJECT EXECUTION SYSTEM</small></span>
+        </a>
+        <nav class="nav-actions" aria-label="Main navigation">
+            {% if user.is_authenticated %}
+                <a class="button secondary" href="{% url 'projects:dashboard' %}">Workspace</a>
+                <span class="user-chip">{{ user.get_username }}</span>
+                <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="ghost" type="submit">Log out ↗</button></form>
+            {% else %}
+                <a class="button secondary" href="{% url 'login' %}">Sign in</a>
+                <a class="button" href="{% url 'projects:register' %}">Create account</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+{% if messages %}<div class="shell messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% block content %}{% endblock %}
+<footer class="footer"><div class="shell">TELIX SHIPSHIELD <span class="muted">· Plan clearly. Execute deliberately. Verify with evidence.</span></div></footer>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

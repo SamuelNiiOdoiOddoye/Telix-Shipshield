@@ -1,46 +1,5 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect GitHub | Telix ShipShield</title>
-    <style>
-        body { background:#0b1020; color:#edf2ff; font-family:Arial,sans-serif; }
-        main { max-width:760px; margin:50px auto; padding:24px; }
-        section { background:#141c30; border:1px solid #293550; border-radius:12px; padding:24px; }
-        input { box-sizing:border-box; width:100%; padding:12px; margin:12px 0; }
-        button, a { display:inline-block; padding:11px 15px; border:0; border-radius:8px; background:#6c8cff; color:#081020; font-weight:bold; text-decoration:none; cursor:pointer; }
-        .error { color:#ff9b9b; }
-        .muted { color:#aab6ce; }
-    </style>
-</head>
-<body>
-<main>
-    <p><a href="{% url 'projects:detail' project_id=project.pk %}">← Back to project</a></p>
-    <h1>Connect a GitHub repository</h1>
-    <p class="muted">Project: {{ project.name }}</p>
-
-    <section>
-        <p>Enter a repository URL that your configured GitHub token can access.</p>
-
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
-
-        <form method="post">
-            {% csrf_token %}
-            <label for="repository_url">GitHub repository URL</label>
-            <input
-                id="repository_url"
-                name="repository_url"
-                type="url"
-                placeholder="https://github.com/owner/repository"
-                required
-            >
-            <button type="submit">Connect repository</button>
-        </form>
-    </section>
-</main>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Connect GitHub · {{ project.name }}{% endblock %}
+{% block content %}
+<main class="shell page"><div class="form-panel"><a class="muted" href="{% url 'projects:detail' project_id=project.pk %}">← Back to project</a><div class="eyebrow" style="margin-top:24px">REPOSITORY INTEGRATION</div><h1>Connect your codebase.</h1><p class="muted">Link a GitHub repository to {{ project.name }}. ShipShield will inspect available metadata, documentation, manifests, tests and CI configuration.</p><section class="panel">{% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}<form method="post" class="form-grid">{% csrf_token %}<label for="repository_url">GitHub repository URL<input id="repository_url" name="repository_url" type="url" placeholder="https://github.com/owner/repository" required value="{{ request.POST.repository_url|default:'' }}"></label><p class="field-help">Private repositories require a valid GitHub token configured by the project operator. Never paste a token into this form.</p><button type="submit">Connect repository ↗</button></form></section></div></main>
+{% endblock %}

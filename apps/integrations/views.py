@@ -603,10 +603,6 @@ def build_health_findings(details):
 
 @login_required
 @require_POST
-
-@login_required
-@require_POST
-
 def repository_audit(request, project_id, repository_id):
     project = _owned_project(project_id, request.user)
 

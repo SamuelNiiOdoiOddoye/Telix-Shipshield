@@ -15,4 +15,5 @@ urlpatterns = [
     path("", include("apps.planning.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("integrations/", include("apps.integrations.urls")),
+    path("evidence/", include("apps.evidence.urls")),
 ]
