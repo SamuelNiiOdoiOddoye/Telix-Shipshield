@@ -1,5 +1,6 @@
 from django.shortcuts import render
-
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
@@ -53,3 +54,40 @@ def project_create(request):
 
     return render(request, "projects/project_form.html")
 
+def register(request):
+    if request.user.is_authenticated:
+        return redirect("projects:dashboard")
+
+    form = UserCreationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        login(request, user)
+        return redirect("projects:dashboard")
+
+    return render(
+        request,
+        "registration/register.html",
+        {"form": form},
+    )
+    if request.user.is_authenticated:
+        return redirect("projects:dashboard")
+    
+    form = UserCreationForm(request.POST or None)
+    
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        login(request,user)
+        form = UserCreationForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("login")
+    else:
+        form = UserCreationForm()
+
+    return render(
+        request,
+        "registration/signup.html",
+        {"form": form},
+    )
