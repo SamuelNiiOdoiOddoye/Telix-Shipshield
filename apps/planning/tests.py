@@ -128,3 +128,51 @@ class ProjectPlanTests(TestCase):
             Milestone.objects.filter(project=self.project).count(),
             0,
         )
+
+    def test_invalid_plan_creates_no_records(self):
+        from apps.planning.services import approve_and_save_plan
+
+        with self.assertRaises(PlanValidationError):
+            approve_and_save_plan(
+                project=self.project,
+                user=self.user,
+                plan={"milestones": []},
+            )
+
+        self.assertEqual(Milestone.objects.filter(project=self.project).count(), 0)
+        self.assertEqual(Task.objects.count(), 0)
+        self.assertEqual(AcceptanceCriterion.objects.count(), 0)
+
+    def test_database_failure_rolls_back_entire_plan(self):
+        from unittest.mock import patch
+
+        from apps.planning.services import approve_and_save_plan
+
+        plan = {
+            "milestones": [
+                {
+                    "title": "Build the dashboard",
+                    "tasks": [
+                        {
+                            "title": "Create dashboard layout",
+                            "acceptance_criteria": ["Layout renders"],
+                        }
+                    ],
+                }
+            ]
+        }
+
+        with patch(
+            "apps.planning.services.AcceptanceCriterion.objects.create",
+            side_effect=RuntimeError("Simulated database failure"),
+        ):
+            with self.assertRaises(RuntimeError):
+                approve_and_save_plan(
+                    project=self.project,
+                    user=self.user,
+                    plan=plan,
+                )
+
+        self.assertEqual(Milestone.objects.filter(project=self.project).count(), 0)
+        self.assertEqual(Task.objects.count(), 0)
+        self.assertEqual(AcceptanceCriterion.objects.count(), 0)
