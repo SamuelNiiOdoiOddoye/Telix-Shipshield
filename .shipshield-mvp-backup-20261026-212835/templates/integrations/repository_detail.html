@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository | Telix ShipShield</title>
+    <style>
+
+        body { background:#0b1020; color:#edf2ff; font-family:Arial,sans-serif; }
+        main { max-width:900px; margin:40px auto; padding:24px; }
+        section, article { margin:18px 0; padding:20px; background:#141c30; border:1px solid #293550; border-radius:12px; }
+        a, button { display:inline-block; padding:10px 14px; border:0; border-radius:8px; background:#6c8cff; color:#081020; font-weight:bold; text-decoration:none; cursor:pointer; }
+        .muted { color:#aab6ce; }
+        pre { white-space:pre-wrap; overflow-wrap:anywhere; }
+
+        .finding {
+            margin: 16px 0;
+            padding: 18px;
+            background: #10182a;
+            border: 1px solid #293550;
+            border-radius: 10px;
+        }
+
+        .finding-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-passed {
+            background: #173b30;
+            color: #8de0b9;
+        }
+
+        .status-failed {
+            background: #49242d;
+            color: #ffadb7;
+        }
+
+        .status-unverified {
+            background: #40351c;
+            color: #f4d58a;
+        }
+
+        .finding h4 {
+            margin-bottom: 6px;
+        }
+
+        .finding li {
+            margin-bottom: 6px;
+            overflow-wrap: anywhere;
+        }
+
+        .muted {
+            color: #aab6ce;
+        }
+
+
+    </style>
+    
+</head>
+<body>
+<main>
+    <p><a href="{% url 'projects:detail' project_id=project.pk %}">← Back to project</a></p>
+    <h1>{{ repository.owner_name }}/{{ repository.repository_name }}</h1>
+    <p class="muted">Connected to {{ project.name }}</p>
+
+    <section>
+        <h2>Repository connection</h2>
+        <p>Default branch: {{ repository.default_branch|default:"Unknown" }}</p>
+        <p><a href="{{ repository.repository_url }}" target="_blank" rel="noopener noreferrer">Open on GitHub</a></p>
+
+        <form method="post" action="{% url 'integrations:repository_audit' project_id=project.pk repository_id=repository.pk %}">
+            {% csrf_token %}
+            <button type="submit">Inspect repository</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Latest inspection</h2>
+        {% if latest_audit %}
+            <p>Status: {{ latest_audit.get_status_display }}</p>
+            <p>{{ latest_audit.summary }}</p>
+
+            {% if latest_audit.commit_sha %}
+                <p>Latest inspected commit: <code>{{ latest_audit.commit_sha }}</code></p>
+            {% endif %}
+
+            <h3> Health Check Findings</h3>
+
+            {% for finding in latest_audit.findings %}
+                <article class="finding">
+                    <div class="finding-heading">
+                        <strong>{{ finding.check }}</strong>
+
+                        <span class="status status-{{ finding.status }}">
+                            {{ finding.status|title }}
+                        </span>
+                    </div>
+
+                    <p>{{ finding.summary }}</p>
+
+                    {% if finding.severity %}
+                        <p class="muted">
+                            Severity: {{ finding.severity|title }}
+                            {% if finding.category %}
+                                · Category: {{ finding.category }}
+                            {% endif %}
+                        </p>
+                    {% endif %}
+
+                    {% if finding.evidence %}
+                        <h4>Evidence inspected</h4>
+                        <ul>
+                            {% for item in finding.evidence %}
+                                <li>
+                                    <strong>{{ item.source_path }}</strong>
+                                    — {{ item.detail }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if finding.recommendation %}
+                        <h4>Recommended action</h4>
+                        <p>{{ finding.recommendation }}</p>
+                    {% endif %}
+                </article>
+
+            {% empty %}
+                <p class="muted">No findings were recorded for this audit.</p>
+            {% endfor %}
+        {% else %}
+            <p class="muted">No inspections have been run yet.</p>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

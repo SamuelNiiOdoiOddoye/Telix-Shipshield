@@ -37,12 +37,6 @@ class Evidence(models.Model):
         default=EvidenceType.NOTE,
     )
     
-    title = models.CharField(
-        max_length=20,
-        choices=EvidenceType.choices,
-        default=EvidenceType.NOTE,
-    )
-    
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     url= models.URLField(max_length=1000,blank=True)

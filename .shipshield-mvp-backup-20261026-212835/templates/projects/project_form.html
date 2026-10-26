@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Project | Telix ShipShield</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #0b1020; color: #edf2ff; }
+        main { max-width: 680px; margin: 50px auto; padding: 24px; }
+        form { display: grid; gap: 16px; padding: 24px; background: #141c30; border: 1px solid #293550; border-radius: 12px; }
+        label { display: grid; gap: 8px; }
+        input, select, textarea { box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #394766; border-radius: 8px; background: #0b1020; color: #edf2ff; }
+        button { padding: 13px; border: 0; border-radius: 8px; background: #6c8cff; color: #081020; font-weight: bold; cursor: pointer; }
+        a { color: #aabfff; }
+        .error { color: #ffaaaa; }
+    </style>
+</head>
+<body>
+<main>
+    <p><a href="{% url 'projects:dashboard' %}">← Back to projects</a></p>
+    <h1>Create a project</h1>
+    <p>Start with the outcome you want to achieve. You can develop the execution plan next.</p>
+
+    {% if error %}
+        <p class="error" role="alert">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label>
+            Project name *
+            <input type="text" name="name" maxlength="200" required value="{{ request.POST.name|default:'' }}">
+        </label>
+
+        <label>
+            Project type
+            <select name="project_type">
+                <option value="software">Software</option>
+                <option value="business">Business</option>
+                <option value="personal">Personal</option>
+                <option value="research">Research</option>
+                <option value="other" selected>Other</option>
+            </select>
+        </label>
+
+        <label>
+            Description
+            <textarea name="description" rows="4">{{ request.POST.description|default:'' }}</textarea>
+        </label>
+
+        <label>
+            Main goal
+            <textarea name="goal" rows="3">{{ request.POST.goal|default:'' }}</textarea>
+        </label>
+
+        <label>
+            Target date (optional)
+            <input type="date" name="target_date" value="{{ request.POST.target_date|default:'' }}">
+        </label>
+
+        <button type="submit">Create project</button>
+    </form>
+</main>
+</body>
+</html>

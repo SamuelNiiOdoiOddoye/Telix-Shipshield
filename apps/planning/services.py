@@ -110,5 +110,8 @@ def approve_and_save_plan(
             "updated_at",
         ]
     )
+    if project.status == Project.Status.DRAFT:
+        project.status = Project.Status.ACTIVE
+        project.save(update_fields=["status", "updated_at"])
 
     return created_milestones

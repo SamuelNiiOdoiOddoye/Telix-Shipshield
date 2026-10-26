@@ -33,7 +33,7 @@ class Milestone(models.Model):
 class Task(models.Model):
     class Status(models.TextChoices):
         TODO = "todo","To do"
-        IN_PROGRESS = "in_progresss" ,"In progress"
+        IN_PROGRESS = "in_progress", "In progress"
         BLOCKED = "blocked","Blocked"
         DONE = "done","Done"
         

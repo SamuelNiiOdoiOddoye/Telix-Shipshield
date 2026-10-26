@@ -1,62 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projects | Telix ShipShield</title>
-    <style>
-        body { margin: 0; font-family: Arial, sans-serif; background: #0b1020; color: #edf2ff; }
-        main { max-width: 1000px; margin: 60px auto; padding: 24px; }
-        header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-        a.button { background: #6c8cff; color: #081020; padding: 12px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; }
-        .project { margin-top: 16px; padding: 20px; background: #141c30; border: 1px solid #293550; border-radius: 12px; }
-        .muted { color: #aab6ce; }
-    </style>
-</head>
-<body>
-<main>
-    <header>
-        <div>
-            <h1>Telix ShipShield</h1>
-            <p class="muted">Your projects. Your execution plans. Your progress.</p>
-        </div>
-
-        <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit">Log out</button>
-        </form>
-
-        <a class="button" href="{% url 'projects:create' %}">+ New project</a>
-    </header>
-
-    <h2>Your projects</h2>
-
-
-    {% for project in projects %}
-        <article class="project">
-            <h3>
-                <a href="{% url 'projects:detail' project_id=project.pk %}">
-                    {{ project.name }}
-                </a>
-            </h3>
-            <p class="muted">{{ project.get_project_type_display }} · {{ project.get_status_display }}</p>
-            {% if project.description %}
-                <p>{{ project.description }}</p>
-            {% endif %}
-            {% if project.goal %}
-                <p><strong>Goal:</strong> {{ project.goal }}</p>
-            {% endif %}
-            {% if project.target_date %}
-                <p><strong>Target date:</strong> {{ project.target_date|date:"M j, Y" }}</p>
-            {% endif %}
+{% extends 'base.html' %}
+{% block title %}Workspace · Telix ShipShield{% endblock %}
+{% block content %}
+<main class="shell page">
+    <div class="page-head">
+        <div><div class="eyebrow">YOUR WORKSPACE</div><h1>Make progress visible.</h1><p>Turn ideas into actionable plans, track execution, and know what is verified before you call a project done.</p></div>
+        <div class="actions"><a class="button" href="{% url 'projects:create' %}">＋ New project</a></div>
+    </div>
+    <div class="grid stats">
+        <div class="stat-card"><div class="eyebrow">ACTIVE PROJECTS</div><div class="stat-value">{{ active_count }}</div><div class="muted">Projects in motion</div></div>
+        <div class="stat-card"><div class="eyebrow">TRACKED TASKS</div><div class="stat-value">{{ task_count }}</div><div class="muted">Across your workspace</div></div>
+        <div class="stat-card"><div class="eyebrow">COMPLETED TASKS</div><div class="stat-value">{{ completed_task_count }}</div><div class="muted">Recorded as done</div></div>
+    </div>
+    <div class="section-title"><h2>Your projects</h2><span class="muted">{{ projects|length }} total</span></div>
+    {% if projects %}
+    <div class="grid projects">
+        {% for project in projects %}
+        <article class="project-card">
+            <div class="card-top"><span class="project-type">{{ project.get_project_type_display }}</span><span class="status status-{{ project.status }}">{{ project.get_status_display }}</span></div>
+            <div><h3><a href="{% url 'projects:detail' project_id=project.pk %}">{{ project.name }}</a></h3><p class="muted">{{ project.description|default:project.goal|default:'Define the outcome and build your execution plan.'|truncatechars:135 }}</p></div>
+            <div><div class="progress-meta"><span>Execution progress</span><strong>{{ project.progress_percent }}%</strong></div><div class="progress"><span style="width:{{ project.progress_percent }}%"></span></div></div>
+            <div class="card-top"><span class="muted">{{ project.completed_tasks }} of {{ project.total_tasks }} tasks done</span><a href="{% url 'projects:detail' project_id=project.pk %}">Open project →</a></div>
+            {% if project.target_date %}<small>Target · {{ project.target_date|date:'M j, Y' }}</small>{% endif %}
         </article>
-    {% empty %}
-        <section class="project">
-            <h3>Your first project starts here.</h3>
-            <p class="muted">Create a project to start building its roadmap and execution plan.</p>
-            <a class="button" href="{% url 'projects:create' %}">Create your first project</a>
-        </section>
-    {% endfor %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty"><div class="empty-mark">✳</div><h2>Your next idea starts here.</h2><p class="muted">Create a project for a product, business, personal goal, research initiative, or any other outcome you want to deliver.</p><a class="button" href="{% url 'projects:create' %}">Create your first project →</a></div>
+    {% endif %}
 </main>
-</body>
-</html>
+{% endblock %}

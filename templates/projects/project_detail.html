@@ -1,182 +1,46 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.name }} | Telix ShipShield</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #0b1020;
-            color: #edf2ff;
-        }
-        main {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 24px;
-        }
-        section, article {
-            margin: 18px 0;
-            padding: 20px;
-            background: #141c30;
-            border: 1px solid #293550;
-            border-radius: 12px;
-        }
-        a, button {
-            display: inline-block;
-            padding: 10px 14px;
-            border: 0;
-            border-radius: 8px;
-            background: #6c8cff;
-            color: #081020;
-            font-weight: bold;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .muted { color: #aab6ce; }
-        .error { color: #ff9b9b; }
-        pre {
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-        }
-        .actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-<body>
-<main>
-    <p><a href="{% url 'projects:dashboard' %}">← All projects</a></p>
-
-    <h1>{{ project.name }}</h1>
-    <p class="muted">
-        {{ project.get_project_type_display }}
-        · {{ project.get_status_display }}
-    </p>
-
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
-
-    <section>
-        <h2>Project overview</h2>
-        <p>{{ project.description|default:"No description added yet." }}</p>
-
-        <p>
-            <a href="{% url 'integrations:repository_connect' project_id=project.pk %}">
-                Connect Github repository
-            </a>
-        </p>
-
-        {% if project.goal %}
-            <p><strong>Goal:</strong> {{ project.goal }}</p>
-        {% endif %}
-
-        {% if project.target_date %}
-            <p>
-                <strong>Target date:</strong>
-                {{ project.target_date|date:"M j, Y" }}
-            </p>
-        {% endif %}
-    </section>
-
-    <section>
-        <h2>Execution plan</h2>
-
-        {% if draft %}
-            <p>
-                <strong>Status:</strong>
-                {{ draft.get_status_display }}
-            </p>
-
-            {% if draft.status == "approved" %}
-                <p class="muted">
-                    Approved
-                    {% if draft.approved_at %}
-                        on {{ draft.approved_at|date:"M j, Y H:i" }}
-                    {% endif %}
-                    {% if draft.approved_by %}
-                        by {{ draft.approved_by }}
-                    {% endif %}
-                </p>
-            {% endif %}
-
-            <h3>Saved plan</h3>
-            <pre>{{ draft.plan|pprint }}</pre>
-        {% else %}
-            <p class="muted">
-                No plan has been saved for this project yet.
-            </p>
-        {% endif %}
-
-        <div class="actions">
-            {% if not draft or draft.status == "draft" %}
-                <a href="{% url 'planning:plan_edit' project_id=project.pk %}">
-                    {% if draft %}Edit draft{% else %}Create plan{% endif %}
-                </a>
-            {% endif %}
-
-            {% if draft and draft.status == "draft" %}
-                <form method="post"
-                    action="{% url 'planning:plan_approve' project_id=project.pk %}">
-                    {% csrf_token %}
-                    <button type="submit"
-                            onclick="return confirm('Approve this plan and create its milestones and tasks?')">
-                        Approve plan
-                    </button>
-                </form>
-            {% endif %}
-        </div>
-    </section>
-
-    <section>
-        <h2>Milestones and tasks</h2>
-
-        {% for milestone in milestones %}
-            <article>
-                <h3>{{ milestone.order|add:1 }}. {{ milestone.title }}</h3>
-
-                {% if milestone.description %}
-                    <p>{{ milestone.description }}</p>
-                {% endif %}
-
-                {% for task in milestone.tasks.all %}
-                    <div>
-                        <h4>{{ task.title }}</h4>
-                        <p class="muted">
-                            {{ task.get_status_display }}
-                            · {{ task.get_priority_display }} priority
-                        </p>
-
-                        {% if task.description %}
-                            <p>{{ task.description }}</p>
-                        {% endif %}
-
-                        {% for criterion in task.acceptance_criteria.all %}
-                            <p>
-                                {% if criterion.is_met %}✓{% else %}○{% endif %}
-                                {{ criterion.description }}
-                            </p>
-                        {% endfor %}
+{% extends 'base.html' %}
+{% block title %}{{ project.name }} · Telix ShipShield{% endblock %}
+{% block content %}
+<main class="shell page">
+    <a class="muted" href="{% url 'projects:dashboard' %}">← Workspace</a>
+    <div class="page-head" style="margin-top:22px">
+        <div><div class="eyebrow">{{ project.get_project_type_display|upper }} PROJECT</div><h1>{{ project.name }}</h1><p>{{ project.description|default:project.goal|default:'No project description yet.' }}</p><div class="actions"><span class="status status-{{ project.status }}">{{ project.get_status_display }}</span>{% if project.target_date %}<span class="pill">Target · {{ project.target_date|date:'M j, Y' }}</span>{% endif %}</div></div>
+        <div class="actions"><a class="button secondary" href="{% url 'integrations:repository_connect' project_id=project.pk %}">⌘ Connect GitHub</a></div>
+    </div>
+    {% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+    <div class="grid stats">
+        <div class="stat-card"><div class="eyebrow">MILESTONES</div><div class="stat-value">{{ milestone_count }}</div><div class="muted">{{ completed_milestone_count }} completed</div></div>
+        <div class="stat-card"><div class="eyebrow">TASKS</div><div class="stat-value">{{ completed_task_count }}/{{ task_count }}</div><div class="muted">Recorded execution</div></div>
+        <div class="stat-card"><div class="eyebrow">OVERALL PROGRESS</div><div class="stat-value">{{ progress_percent }}%</div><div class="progress"><span style="width:{{ progress_percent }}%"></span></div></div>
+    </div>
+    <div class="detail-grid">
+        <div>
+            <section class="panel">
+                <div class="section-title"><h2>Milestones & tasks</h2><span class="muted">Execution tracker</span></div>
+                {% for milestone in milestones %}
+                <article class="milestone">
+                    <div class="milestone-head"><div><div class="eyebrow">MILESTONE {{ forloop.counter|stringformat:'02d' }}</div><h3 style="margin:6px 0">{{ milestone.title }}</h3>{% if milestone.description %}<p class="muted">{{ milestone.description }}</p>{% endif %}</div><span class="status {% if milestone.is_completed %}status-completed{% else %}status-draft{% endif %}">{% if milestone.is_completed %}Complete{% else %}In progress{% endif %}</span></div>
+                    {% for task in milestone.tasks.all %}
+                    <div class="task">
+                        <div class="task-head"><div><h3 style="margin-bottom:5px">{{ task.title }}</h3>{% if task.description %}<p class="muted">{{ task.description }}</p>{% endif %}</div><span class="pill">{{ task.get_priority_display }} priority</span></div>
+                        <form class="task-form" method="post" action="{% url 'planning:task_update' project_id=project.pk task_id=task.pk %}">{% csrf_token %}<label for="status-{{ task.pk }}" style="display:inline;min-width:0">Status</label><select id="status-{{ task.pk }}" name="status">{% for value,label in task_status_choices %}<option value="{{ value }}" {% if task.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select><button class="secondary" type="submit">Update</button></form>
+                        {% for criterion in task.acceptance_criteria.all %}<p class="criterion">{% if criterion.is_met %}<span style="color:var(--success)">✓</span>{% else %}<span style="color:var(--muted)">○</span>{% endif %} {{ criterion.description }}</p>{% endfor %}
+                        {% if task.evidence.all %}<div class="evidence-list"><small>Evidence</small>{% for evidence in task.evidence.all %}<div class="evidence-item"><strong>{{ evidence.title }}</strong>{% if evidence.url %} · <a href="{{ evidence.url }}" target="_blank" rel="noopener noreferrer">Open evidence ↗</a>{% endif %}{% if evidence.description %}<div class="muted">{{ evidence.description }}</div>{% endif %}</div>{% endfor %}</div>{% endif %}
+                        <details style="margin-top:12px"><summary class="muted" style="cursor:pointer;font-size:12px">＋ Add evidence</summary><form class="form-grid" style="margin-top:12px" method="post" action="{% url 'evidence:add' project_id=project.pk task_id=task.pk %}">{% csrf_token %}<label>Evidence title<input name="title" maxlength="200" required placeholder="e.g. Acceptance test screenshot"></label><div class="form-row"><label>Type<select name="evidence_type"><option value="link">Link</option><option value="note">Note</option><option value="screenshot">Screenshot reference</option><option value="other">Other</option></select></label><label>Evidence URL (optional)<input type="url" name="url" placeholder="https://..."></label></div><label>What does this demonstrate?<textarea name="description" rows="2"></textarea></label><button class="secondary" type="submit">Save evidence</button></form></details>
                     </div>
-                {% empty %}
-                    <p class="muted">No tasks in this milestone.</p>
-                {% endfor %}
-            </article>
-        {% empty %}
-            <p class="muted">
-                No milestones yet. Save and approve a plan to create them.
-            </p>
-        {% endfor %}
-    </section>
+                    {% empty %}<p class="muted">No tasks in this milestone.</p>{% endfor %}
+                </article>
+                {% empty %}<div class="empty"><div class="empty-mark">⌘</div><h3>Your execution plan starts here.</h3><p class="muted">Create an editable plan, then approve it to create milestones and tasks.</p><a class="button" href="{% url 'planning:plan_edit' project_id=project.pk %}">Build plan →</a></div>{% endfor %}
+            </section>
+        </div>
+        <aside>
+            <section class="panel"><div class="section-title"><h2>Execution plan</h2>{% if draft %}<span class="status status-{{ draft.status }}">{{ draft.get_status_display }}</span>{% endif %}</div>
+                {% if draft %}<p class="muted">{% if draft.status == 'approved' %}Approved{% if draft.approved_at %} {{ draft.approved_at|date:'M j, Y' }}{% endif %}{% else %}Draft saved · Review before approving.{% endif %}</p><div class="divider"></div><p><strong>{{ draft.plan.milestones|length }}</strong> planned milestones</p>{% if draft.status == 'draft' %}<a class="button secondary" href="{% url 'planning:plan_edit' project_id=project.pk %}">Continue editing</a><form method="post" action="{% url 'planning:plan_approve' project_id=project.pk %}" style="margin-top:10px">{% csrf_token %}<button type="submit" onclick="return confirm('Approve this plan and create its milestones and tasks?')">Approve plan ✓</button></form>{% else %}<p class="muted">Approved plans are locked to protect the execution records created from them.</p>{% endif %}{% else %}<p class="muted">No plan saved yet. Create and edit a plan before approving it.</p><a class="button" href="{% url 'planning:plan_edit' project_id=project.pk %}">Create plan →</a>{% endif %}
+            </section>
+            <section class="panel"><div class="section-title"><h2>Risks & blockers</h2><span class="pill">{{ risks|length }} tracked</span></div><form method="post" action="{% url 'projects:risk_add' project_id=project.pk %}" class="form-grid">{% csrf_token %}<label>Risk or blocker<input name="title" maxlength="200" required placeholder="e.g. Dependency on external approval"></label><div class="form-row"><label>Severity<select name="severity">{% for value,label in risk_severity_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></label><label>Mitigation plan<input name="mitigation" placeholder="How will you reduce the risk?"></label></div><label>Details<textarea name="description" rows="2" placeholder="Impact, likelihood, or context"></textarea></label><button class="secondary" type="submit">＋ Record risk</button></form>{% for risk in risks %}<div class="task"><div class="task-head"><div><h3 style="margin-bottom:5px">{{ risk.title }}</h3><span class="status status-{% if risk.status == 'resolved' %}completed{% elif risk.severity == 'critical' or risk.severity == 'high' %}blocked{% else %}draft{% endif %}">{{ risk.get_severity_display }} · {{ risk.get_status_display }}</span>{% if risk.description %}<p class="muted" style="margin-top:8px">{{ risk.description }}</p>{% endif %}{% if risk.mitigation %}<p class="muted"><strong>Mitigation:</strong> {{ risk.mitigation }}</p>{% endif %}</div></div><form class="task-form" method="post" action="{% url 'projects:risk_update' project_id=project.pk risk_id=risk.pk %}">{% csrf_token %}<select name="status" aria-label="Risk status">{% for value,label in risk_status_choices %}<option value="{{ value }}" {% if risk.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select><button class="secondary" type="submit">Update risk</button></form></div>{% empty %}<p class="muted" style="margin-top:16px">No risks recorded. Add a risk or blocker to make it visible during execution.</p>{% endfor %}</section>
+            <section class="panel"><div class="section-title"><h2>Repository readiness</h2><span class="pill">GitHub</span></div><p class="muted">Inspect repository structure and documentation, then review evidence-backed findings. Test and CI execution are reported as unverified unless actually run.</p><a class="button secondary" href="{% url 'integrations:repository_connect' project_id=project.pk %}">Connect or inspect repository →</a></section>
+            <section class="panel"><h2>Project outcome</h2><p>{{ project.goal|default:'Add a clear goal when creating your project to define what successful delivery means.' }}</p><div class="divider"></div><small>Last updated · {{ project.updated_at|date:'M j, Y H:i' }}</small></section>
+        </aside>
+    </div>
 </main>
-</body>
-</html>
+{% endblock %}

@@ -1,20 +1,5 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create Account | Telix ShipShield</title>
-</head>
-<body>
-    <h1>Create your Telix ShipShield account</h1>
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Create account</button>
-    </form>
-
-    <p><a href="{% url 'login' %}">Already have an account? Sign in</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Create account · Telix ShipShield{% endblock %}
+{% block content %}
+<main class="auth-wrap"><section class="auth-card"><div class="eyebrow">START WITH CLARITY</div><h1 style="font-size:31px;margin-top:10px">Build with a plan.</h1><p class="muted">Create your workspace to organise projects, track execution, and verify delivery with evidence.</p><form method="post">{% csrf_token %}{% if form.non_field_errors %}<div class="alert">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<label for="{{ field.id_for_label }}">{{ field.label }}{{ field }}{% if field.help_text %}<span class="helptext">{{ field.help_text|safe }}</span>{% endif %}{% for error in field.errors %}<span style="color:var(--danger);font-size:12px">{{ error }}</span>{% endfor %}</label>{% endfor %}<button type="submit">Create account →</button></form><div class="auth-footer">Already have an account? <a href="{% url 'login' %}">Sign in</a></div></section></main>
+{% endblock %}

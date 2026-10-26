@@ -87,22 +87,31 @@ Repository analysis should distinguish observed facts from assumptions. A config
 
 ## Current Development Status
 
-**Status:** Early development / hackathon MVP.
+**Status:** Hackathon MVP in active development.
 
-ShipShield is being built incrementally. The repository structure and development environment are being prepared before the core project workflows are implemented.
+The current implementation includes the core project journey:
 
-| Area                   | Current direction                                             |
-| ---------------------- | ------------------------------------------------------------- |
-| Backend                | Django modular monolith                                       |
-| Database               | PostgreSQL                                                    |
-| Project management     | Projects, milestones, tasks, and criteria                     |
-| Evidence               | Evidence-backed completion and readiness assessments          |
-| AI                     | Alan AI integration, subject to API and platform validation   |
-| Repository integration | Optional GitHub inspection and reviewed documentation updates |
-| Interface              | Premium, dark, technical product experience                   |
-| Deployment             | To be configured and verified                                 |
+- Public account registration, sign-in, and sign-out.
+- User-scoped project dashboard and project creation for software, business, personal, research, and other projects.
+- Editable JSON execution plans, validation, draft persistence, and explicit approval before milestones/tasks are created.
+- Task status tracking, milestone completion, and dashboard progress calculations.
+- Project risks with severity, mitigation notes, and status updates.
+- Task evidence records with type, description, and optional URL.
+- GitHub repository connection and repository-tree/README readiness findings.
+- Explicit unverified results where tests or CI were not executed by ShipShield.
+- A shared responsive dark navy / teal interface across authentication, project, planning, and repository screens.
 
-The status table describes the intended architecture and development direction, not a claim that each capability is already operational.
+**Known limitations:** Plan suggestions are a deterministic editable starter, not AI-generated output. The GitHub audit inspects repository metadata and files; it does not execute arbitrary repository code, run test suites, or verify CI workflow runs. Evidence currently supports links and notes; direct file uploads and a full readiness-report workflow are not part of this MVP. The Google Stitch design files were not included in the uploaded project ZIP, so the interface follows the accepted visual direction but has not been verified as a pixel-perfect match to the Stitch frames.
+
+## Hackathon Demo Flow
+
+1. Register a fresh account and sign in.
+2. Create a project for a software, business, personal, or research outcome.
+3. Open the starter execution plan, edit the milestones/tasks/acceptance criteria, and save the draft.
+4. Approve the plan to create milestone and task records.
+5. Change task statuses, record risks and mitigations, and attach evidence links or notes.
+6. Connect a GitHub repository and run an inspection.
+7. Explain the audit findings, including why discovered test configuration is not proof that tests passed.
 
 ## Technology Stack
 
@@ -231,12 +240,10 @@ python manage.py migrate
 ### 7. Start the development server
 
 ```powershell
-python manage.py runserver
+python manage.py runserver 9000
 ```
 
-Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
-
-The development server starts Django; the final product interface and application workflows will become available as they are implemented.
+Open [http://127.0.0.1:9000/](http://127.0.0.1:9000/) in your browser. The root redirects to your workspace after sign-in. Registration is available at `/projects/register/`.
 
 ---
 

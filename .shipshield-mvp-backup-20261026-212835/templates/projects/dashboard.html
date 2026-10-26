@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Telix ShipShield</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #0b1020; color: #edf2ff; }
+        main { max-width: 1000px; margin: 60px auto; padding: 24px; }
+        header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+        a.button { background: #6c8cff; color: #081020; padding: 12px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        .project { margin-top: 16px; padding: 20px; background: #141c30; border: 1px solid #293550; border-radius: 12px; }
+        .muted { color: #aab6ce; }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <div>
+            <h1>Telix ShipShield</h1>
+            <p class="muted">Your projects. Your execution plans. Your progress.</p>
+        </div>
+
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Log out</button>
+        </form>
+
+        <a class="button" href="{% url 'projects:create' %}">+ New project</a>
+    </header>
+
+    <h2>Your projects</h2>
+
+
+    {% for project in projects %}
+        <article class="project">
+            <h3>
+                <a href="{% url 'projects:detail' project_id=project.pk %}">
+                    {{ project.name }}
+                </a>
+            </h3>
+            <p class="muted">{{ project.get_project_type_display }} · {{ project.get_status_display }}</p>
+            {% if project.description %}
+                <p>{{ project.description }}</p>
+            {% endif %}
+            {% if project.goal %}
+                <p><strong>Goal:</strong> {{ project.goal }}</p>
+            {% endif %}
+            {% if project.target_date %}
+                <p><strong>Target date:</strong> {{ project.target_date|date:"M j, Y" }}</p>
+            {% endif %}
+        </article>
+    {% empty %}
+        <section class="project">
+            <h3>Your first project starts here.</h3>
+            <p class="muted">Create a project to start building its roadmap and execution plan.</p>
+            <a class="button" href="{% url 'projects:create' %}">Create your first project</a>
+        </section>
+    {% endfor %}
+</main>
+</body>
+</html>

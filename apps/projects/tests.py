@@ -22,7 +22,6 @@ class ProjectViewsTests(TestCase):
 
     def test_dashboard_requires_login(self):
         response = self.client.get(self.dashboard_url)
-
         self.assertEqual(response.status_code, 302)
 
     def test_dashboard_only_shows_current_users_projects(self):
@@ -44,7 +43,6 @@ class ProjectViewsTests(TestCase):
 
     def test_create_page_requires_login(self):
         response = self.client.get(self.create_url)
-
         self.assertEqual(response.status_code, 302)
 
     def test_user_can_create_project(self):
@@ -61,8 +59,18 @@ class ProjectViewsTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, self.dashboard_url)
-        project = Project.objects.get(name="Telix ShipShield")
+        project = Project.objects.get(
+            owner=self.user,
+            name="Telix ShipShield",
+        )
+
+        self.assertRedirects(
+            response,
+            reverse(
+                "projects:detail",
+                kwargs={"project_id": project.pk},
+            ),
+        )
         self.assertEqual(project.owner, self.user)
         self.assertEqual(project.project_type, "software")
         self.assertEqual(project.goal, "Deliver a working MVP")
@@ -93,6 +101,68 @@ class ProjectViewsTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, self.dashboard_url)
-        project = Project.objects.get(name="General project")
-        self.assertEqual(project.project_type, Project.ProjectType.OTHER)
+        project = Project.objects.get(
+            owner=self.user,
+            name="General project",
+        )
+
+        self.assertRedirects(
+            response,
+            reverse(
+                "projects:detail",
+                kwargs={"project_id": project.pk},
+            ),
+        )
+        self.assertEqual(
+            project.project_type,
+            Project.ProjectType.OTHER,
+        )
+
+
+
+class RegistrationViewTests(TestCase):
+    
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="existing_shipshield_user",
+            password="Safe-test-password-927!",
+        )
+
+    def test_registration_page_is_public(self):
+        response = self.client.get(reverse("projects:register"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Create account")
+
+    def test_user_can_register_and_is_logged_in(self):
+        response = self.client.post(
+            reverse("projects:register"),
+            {
+                "username": "new_shipshield_user",
+                "password1": "Safe-test-password-927!",
+                "password2": "Safe-test-password-927!",
+            },
+        )
+        self.assertRedirects(
+            response,
+            reverse("projects:dashboard"),
+        )
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    
+    def test_authenticated_user_is_redirected_from_registration(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("projects:register"))
+        self.assertRedirects(
+            response,
+            reverse("projects:dashboard"),
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("projects:register"))
+        self.assertRedirects(
+            response,
+            reverse("projects:dashboard"),
+        )
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("projects:register"))
+        self.assertRedirects(response, reverse("projects:dashboard"))
