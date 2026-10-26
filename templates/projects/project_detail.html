@@ -70,6 +70,12 @@
         <h2>Project overview</h2>
         <p>{{ project.description|default:"No description added yet." }}</p>
 
+        <p>
+            <a href="{% url 'integrations:repository_connect' project_id=project.pk %}">
+                Connect Github repository
+            </a>
+        </p>
+
         {% if project.goal %}
             <p><strong>Goal:</strong> {{ project.goal }}</p>
         {% endif %}
