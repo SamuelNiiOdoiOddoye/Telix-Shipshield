@@ -10,22 +10,36 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
+
+def env_required(name):
+    value=os.getenv(name)
+    if not value or value.startswith("replace-with-"):
+        raise ImproperlyConfigured(f"Environment variable '{name}' is required but not set.")
+    return value
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-rc&ddtxs#ux6*iz%37t0&%4a@s89lk0d%b8y$m)pyqh)rd66*g'
+SECRET_KEY = env_required('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG","False").lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED HOSTS", "localhost, 127.0.0.1/9000").split(",")
+    if host.strip()
+]
 
 
 # Application definition
@@ -74,8 +88,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env_required('DB_NAME'),
+        'USER': env_required('DB_USER'),
+        'PASSWORD': env_required('DB_PASSWORD'),
+        'HOST': env_required('DB_HOST'),
+        'PORT': env_required('DB_PORT'),
+        "CONN_MAX_AGE": 60,
     }
 }
 
