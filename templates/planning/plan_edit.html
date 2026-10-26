@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit plan | {{ project.name }}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: #edf2ff;
+        }
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 24px;
+        }
+        textarea {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 420px;
+            padding: 16px;
+            border: 1px solid #354566;
+            border-radius: 8px;
+            background: #080d19;
+            color: #edf2ff;
+            font: 14px/1.6 monospace;
+        }
+        button, a {
+            display: inline-block;
+            margin: 12px 8px 0 0;
+            padding: 11px 15px;
+            border: 0;
+            border-radius: 8px;
+            background: #6c8cff;
+            color: #081020;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .muted { color: #aab6ce; }
+        .error { color: #ff9b9b; }
+    </style>
+</head>
+<body>
+<main>
+    <p>
+        <a href="{% url 'projects:detail' project_id=project.pk %}">
+            ← Back to project
+        </a>
+    </p>
+
+    <h1>Edit execution plan</h1>
+    <p class="muted">{{ project.name }}</p>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <p>
+        Edit the JSON below. Saving a draft does not create milestones or tasks.
+        Approval is a separate action on the project page.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label for="plan"><strong>Project plan JSON</strong></label>
+        <p class="muted">
+            Each milestone needs a title and at least one task.
+        </p>
+
+        <textarea id="plan"
+                  name="plan"
+                  spellcheck="false"
+                  required>{{ plan_json }}</textarea>
+
+        <button type="submit">Save draft</button>
+    </form>
+</main>
+</body>
+</html>

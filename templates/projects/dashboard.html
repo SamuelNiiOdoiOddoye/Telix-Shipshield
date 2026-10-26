@@ -27,7 +27,11 @@
 
     {% for project in projects %}
         <article class="project">
-            <h3>{{ project.name }}</h3>
+            <h3>
+                <a href="{% url 'projects:detail' project_id=project.pk %}">
+                    {{ project.name }}
+                </a>
+            </h3>
             <p class="muted">{{ project.get_project_type_display }} · {{ project.get_status_display }}</p>
             {% if project.description %}
                 <p>{{ project.description }}</p>

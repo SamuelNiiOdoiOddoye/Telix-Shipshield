@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.name }} | Telix ShipShield</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: #edf2ff;
+        }
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 24px;
+        }
+        section, article {
+            margin: 18px 0;
+            padding: 20px;
+            background: #141c30;
+            border: 1px solid #293550;
+            border-radius: 12px;
+        }
+        a, button {
+            display: inline-block;
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 8px;
+            background: #6c8cff;
+            color: #081020;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .muted { color: #aab6ce; }
+        .error { color: #ff9b9b; }
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <p><a href="{% url 'projects:dashboard' %}">← All projects</a></p>
+
+    <h1>{{ project.name }}</h1>
+    <p class="muted">
+        {{ project.get_project_type_display }}
+        · {{ project.get_status_display }}
+    </p>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <section>
+        <h2>Project overview</h2>
+        <p>{{ project.description|default:"No description added yet." }}</p>
+
+        {% if project.goal %}
+            <p><strong>Goal:</strong> {{ project.goal }}</p>
+        {% endif %}
+
+        {% if project.target_date %}
+            <p>
+                <strong>Target date:</strong>
+                {{ project.target_date|date:"M j, Y" }}
+            </p>
+        {% endif %}
+    </section>
+
+    <section>
+        <h2>Execution plan</h2>
+
+        {% if draft %}
+            <p>
+                <strong>Status:</strong>
+                {{ draft.get_status_display }}
+            </p>
+
+            {% if draft.status == "approved" %}
+                <p class="muted">
+                    Approved
+                    {% if draft.approved_at %}
+                        on {{ draft.approved_at|date:"M j, Y H:i" }}
+                    {% endif %}
+                    {% if draft.approved_by %}
+                        by {{ draft.approved_by }}
+                    {% endif %}
+                </p>
+            {% endif %}
+
+            <h3>Saved plan</h3>
+            <pre>{{ draft.plan|pprint }}</pre>
+        {% else %}
+            <p class="muted">
+                No plan has been saved for this project yet.
+            </p>
+        {% endif %}
+
+        <div class="actions">
+            {% if not draft or draft.status == "draft" %}
+                <a href="{% url 'planning:plan_edit' project_id=project.pk %}">
+                    {% if draft %}Edit draft{% else %}Create plan{% endif %}
+                </a>
+            {% endif %}
+
+            {% if draft and draft.status == "draft" %}
+                <form method="post"
+                    action="{% url 'planning:plan_approve' project_id=project.pk %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            onclick="return confirm('Approve this plan and create its milestones and tasks?')">
+                        Approve plan
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </section>
+
+    <section>
+        <h2>Milestones and tasks</h2>
+
+        {% for milestone in milestones %}
+            <article>
+                <h3>{{ milestone.order|add:1 }}. {{ milestone.title }}</h3>
+
+                {% if milestone.description %}
+                    <p>{{ milestone.description }}</p>
+                {% endif %}
+
+                {% for task in milestone.tasks.all %}
+                    <div>
+                        <h4>{{ task.title }}</h4>
+                        <p class="muted">
+                            {{ task.get_status_display }}
+                            · {{ task.get_priority_display }} priority
+                        </p>
+
+                        {% if task.description %}
+                            <p>{{ task.description }}</p>
+                        {% endif %}
+
+                        {% for criterion in task.acceptance_criteria.all %}
+                            <p>
+                                {% if criterion.is_met %}✓{% else %}○{% endif %}
+                                {{ criterion.description }}
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% empty %}
+                    <p class="muted">No tasks in this milestone.</p>
+                {% endfor %}
+            </article>
+        {% empty %}
+            <p class="muted">
+                No milestones yet. Save and approve a plan to create them.
+            </p>
+        {% endfor %}
+    </section>
+</main>
+</body>
+</html>
