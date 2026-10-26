@@ -1,11 +1,4 @@
-from django.db import transaction
 from typing import Any
-
-from apps.planning.models import(
-    AcceptanceCriterion,
-    Milestone,
-    Task,
-)
 class PlanValidationError(ValueError):
     """Raised when a generated project plan is invalid."""
 

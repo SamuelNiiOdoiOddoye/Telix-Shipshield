@@ -11,14 +11,10 @@ from apps.planning.models import (
     Milestone,
     Task,
 )
-from .services import (
-    PlanValidationError,
-    validate_project_plan,
-)
 
 from apps.assistant.services import(
     PlanValidationError,
-    validate_project_plan,
+    validate_project_plan
 )
 
 from apps.planning.services import approve_and_save_plan
@@ -191,7 +187,11 @@ class ApproveAndSavePlanTests(TestCase):
             project_type=Project.ProjectType.OTHER,
         )
 
-        approve_and_save_plan(self.project, self.valid_plan())
+        approve_and_save_plan(
+            project=self.project,
+            user=self.user,
+            plan=self.valid_plan(),
+        )
 
         self.assertEqual(
             Milestone.objects.filter(project=self.project).count(),
@@ -218,7 +218,11 @@ class ApproveAndSavePlanTests(TestCase):
         }
 
         with self.assertRaises(PlanValidationError):
-            approve_and_save_plan(self.project, invalid_plan)
+            approve_and_save_plan(
+                project=self.project,
+                user=self.user,
+                plan=invalid_plan,
+            )
 
         self.assertEqual(Milestone.objects.count(), 0)
         self.assertEqual(Task.objects.count(), 0)
@@ -239,8 +243,9 @@ class ApproveAndSavePlanTests(TestCase):
                 # Catch the database error outside the atomic block.
                 with transaction.atomic():
                     approve_and_save_plan(
-                        self.project,
-                        self.valid_plan(),
+                        project=self.project,
+                        user=self.user,
+                        plan=self.valid_plan(),
                     )
 
         self.assertEqual(
