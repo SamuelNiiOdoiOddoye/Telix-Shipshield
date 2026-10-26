@@ -97,6 +97,52 @@ def _github_get(path):
         ) from exc
 
 
+def inspect_repository_tree(base_path, latest_commit_sha):
+    """Retrieve repository paths from the latest commit's recursive Git tree.
+
+    Return a bounded list of entries, whether the tree was truncated,
+    and an error message if the tree could not be inspected.
+    """
+    if not latest_commit_sha:
+        return [], False, "No commit SHA was available to inspect the tree."
+
+    try:
+        commit_data = _github_get(
+            f"{base_path}/git/commits/{latest_commit_sha}"
+        )
+        tree_sha = commit_data.get("tree", {}).get("sha")
+
+        if not tree_sha:
+            return [], False, "GitHub did not return a tree SHA."
+
+        tree_data = _github_get(
+            f"{base_path}/git/trees/{tree_sha}?recursive=1"
+        )
+        entries = tree_data.get("tree", [])
+
+        if not isinstance(entries, list):
+            return [], False, "GitHub returned an unexpected tree structure."
+
+        # Bound the amount of tree data retained by the application.
+        limit = 5000
+        normalized_entries = [
+            {
+                "path": entry.get("path", ""),
+                "type": entry.get("type", ""),
+                "size": entry.get("size"),
+            }
+            for entry in entries[:limit]
+            if entry.get("path")
+        ]
+
+        was_truncated = bool(tree_data.get("truncated")) or len(entries) > limit
+
+        return normalized_entries, was_truncated, ""
+
+    except GitHubIntegrationError as exc:
+        return [], False, str(exc)
+
+
 def inspect_repository(owner, name):
     """Read repository metadata, root files, README and latest commit."""
     encoded_owner = requests.utils.quote(owner, safe="")
@@ -143,6 +189,11 @@ def inspect_repository(owner, name):
 
     latest_commit = commits[0] if commits else {}
     commit_info = latest_commit.get("commit", {})
+    
+    tree_entries, tree_truncated, tree_error = inspect_repository_tree(
+        base_path,
+        latest_commit.get("sha",""),
+    )
 
     return {
         "full_name": metadata.get("full_name", f"{owner}/{name}"),
@@ -161,6 +212,9 @@ def inspect_repository(owner, name):
             for item in contents[:100]
         ],
         "readme": readme,
+        "full_tree" : tree_entries,
+        "tree_truncated" : tree_truncated,
+        "tree_error" : tree_error,
         "latest_commit_sha": latest_commit.get("sha", ""),
         "latest_commit_message": commit_info.get("message", ""),
         "latest_commit_date": (
