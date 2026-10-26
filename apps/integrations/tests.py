@@ -5,6 +5,7 @@ from apps.integrations.views import build_health_findings
 
 
 class RepositoryHealthAuditTests(SimpleTestCase):
+    
     def setUp(self):
         self.details = {
             "full_name": "example/project",
