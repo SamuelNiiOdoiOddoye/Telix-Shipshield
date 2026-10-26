@@ -56,7 +56,6 @@ class RepositoryHealthAuditTests(SimpleTestCase):
         self.assertEqual(by_id["readme_usage"]["status"], "failed")
         self.assertEqual(by_id["readme_testing"]["status"], "failed")
 
-    
     def test_missing_test_indicators_are_unverified_not_failed(self):
         details = {
             **self.details,
@@ -166,6 +165,22 @@ class RepositoryHealthAuditTests(SimpleTestCase):
                 for evidence in ci["evidence"]
             )
         )
+
+
+    def test_detecting_test_files_does_not_claim_tests_passed(self):
+        findings = build_health_findings(self.details)
+        by_id = {finding["id"]: finding for finding in findings}
+
+        self.assertEqual(by_id["test_presence"]["status"], "passed")
+        self.assertEqual(by_id["test_execution"]["status"], "unverified")
+
+    def test_detecting_ci_config_does_not_claim_workflow_succeeded(self):
+        findings = build_health_findings(self.details)
+        by_id = {finding["id"]: finding for finding in findings}
+
+        self.assertEqual(by_id["ci_presence"]["status"], "passed")
+        self.assertEqual(by_id["ci_execution"]["status"], "unverified")
+
 
     def test_incomplete_tree_does_not_claim_indicators_are_absent(self):
         details = {

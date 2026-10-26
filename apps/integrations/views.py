@@ -454,10 +454,11 @@ def build_health_findings(details):
             ),
         }]
 
+    
     add_finding(
         "test_presence",
         "Development health",
-        "Test suite indicators",
+        "Test files and configuration detected",
         test_status,
         test_severity,
         test_summary,
@@ -465,6 +466,24 @@ def build_health_findings(details):
         "Run the test suite and record the command, result, and commit as "
         "verification evidence. If tests do not exist, add tests for critical behavior.",
     )
+
+    # Detecting test files does not prove that tests pass.
+    add_finding(
+        "test_execution",
+        "Verification",
+        "Test execution",
+        "unverified",
+        "medium",
+        "The repository audit did not execute the project's tests or "
+        "retrieve evidence of a successful test run.",
+        [{
+            "source_path": "Repository audit",
+            "detail": "File discovery does not prove that tests pass.",
+        }],
+        "Run the test suite in a suitable environment and record the command, "
+        "result, and commit as verification evidence.",
+    )
+
 
     # 5. Continuous integration indicators
     ci_paths = []
@@ -534,7 +553,7 @@ def build_health_findings(details):
     add_finding(
         "ci_presence",
         "Development health",
-        "Continuous integration indicators",
+        "CI/CD configuration detected",
         ci_status,
         ci_severity,
         ci_summary,
@@ -542,6 +561,42 @@ def build_health_findings(details):
         "Inspect the configuration and verify that automated workflows run "
         "successfully for the default branch.",
     )
+    
+    
+    # Detecting a workflow file does not prove it succeeded.
+    add_finding(
+        "ci_execution",
+        "Verification",
+        "CI/CD execution",
+        "unverified",
+        "medium",
+        "The audit did not verify a successful CI/CD workflow run.",
+        [{
+            "source_path": "Repository audit",
+            "detail": "Workflow execution results were not retrieved or verified.",
+        }],
+        "Retrieve a recent workflow run for the inspected commit and record "
+        "its conclusion as verification evidence.",
+    )
+
+    
+    # Detecting test files does not prove that tests pass.
+    add_finding(
+        "test_execution",
+        "Verification",
+        "Test execution",
+        "unverified",
+        "medium",
+        "The repository audit did not execute the project's tests or "
+        "retrieve evidence of a successful test run.",
+        [{
+            "source_path": "Repository audit",
+            "detail": "File discovery does not prove that tests pass.",
+        }],
+        "Run the test suite in a suitable environment and record the command, "
+        "result, and commit as verification evidence.",
+    )
+
 
 
     return findings
