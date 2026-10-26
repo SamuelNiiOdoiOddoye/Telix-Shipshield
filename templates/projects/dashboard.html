@@ -2,10 +2,24 @@
 {% block title %}Workspace · Telix ShipShield{% endblock %}
 {% block content %}
 <main class="shell page">
-    <div class="page-head">
-        <div><div class="eyebrow">YOUR WORKSPACE</div><h1>Make progress visible.</h1><p>Turn ideas into actionable plans, track execution, and know what is verified before you call a project done.</p></div>
-        <div class="actions"><a class="button" href="{% url 'projects:create' %}">＋ New project</a></div>
+    
+<div class="page-head">
+    <div>
+        <div class="eyebrow">TELIX SHIPSHIELD / WORKSPACE</div>
+        <h1>Make progress visible.</h1>
+        <p>
+            Your projects, execution plans, and delivery evidence
+            in one workspace.
+        </p>
     </div>
+    <div class="actions">
+        <a class="button" href="{% url 'projects:create' %}">
+            + New project
+        </a>
+    </div>
+</div>
+
+
     <div class="grid stats">
         <div class="stat-card"><div class="eyebrow">ACTIVE PROJECTS</div><div class="stat-value">{{ active_count }}</div><div class="muted">Projects in motion</div></div>
         <div class="stat-card"><div class="eyebrow">TRACKED TASKS</div><div class="stat-value">{{ task_count }}</div><div class="muted">Across your workspace</div></div>
