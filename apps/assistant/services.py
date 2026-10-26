@@ -1,7 +1,11 @@
-
+from django.db import transaction
 from typing import Any
 
-
+from apps.planning.models import(
+    AcceptanceCriterion,
+    Milestone,
+    Task,
+)
 class PlanValidationError(ValueError):
     """Raised when a generated project plan is invalid."""
 
@@ -86,3 +90,51 @@ def validate_project_plan(plan: Any) -> dict:
                 )
 
     return plan
+
+@transaction.atomic
+def approve_and_save_plan(project, plan):
+    """
+    Validate and persist an explicitly approved project plan.
+
+    If any database write fails, all changes are rolled back.
+    """
+    validated_plan = validate_project_plan(plan)
+
+    for milestone_order, milestone_data in enumerate(
+        validated_plan["milestones"]
+    ):
+        milestone = Milestone.objects.create(
+            project=project,
+            title=milestone_data["title"].strip(),
+            description=milestone_data.get("description", "").strip(),
+            order=milestone_order,
+        )
+
+        for task_order, task_data in enumerate(
+            milestone_data["tasks"]
+        ):
+            task = Task.objects.create(
+                milestone=milestone,
+                title=task_data["title"].strip(),
+                description=task_data.get("description", "").strip(),
+                priority=task_data.get("priority", "medium"),
+                order=task_order,
+            )
+
+            criteria = task_data.get("acceptance_criteria", [])
+
+            AcceptanceCriterion.objects.bulk_create([
+                AcceptanceCriterion(
+                    task=task,
+                    description=criterion.strip(),
+                )
+                for criterion in criteria
+            ])
+
+    return {
+        "milestones_created": len(validated_plan["milestones"]),
+        "tasks_created": sum(
+            len(milestone["tasks"])
+            for milestone in validated_plan["milestones"]
+        ),
+    }
