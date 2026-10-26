@@ -14,8 +14,14 @@ from apps.planning.models import (
 from .services import (
     PlanValidationError,
     validate_project_plan,
-    approve_and_save_plan,
 )
+
+from apps.assistant.services import(
+    PlanValidationError,
+    validate_project_plan,
+)
+
+from apps.planning.services import approve_and_save_plan
 
 
 class ValidateProjectPlanTests(SimpleTestCase):
@@ -130,13 +136,20 @@ class ApproveAndSavePlanTests(TestCase):
         }
 
     def test_saves_milestones_tasks_and_acceptance_criteria(self):
-        result = approve_and_save_plan(
-            self.project,
-            self.valid_plan(),
+        created_milestones = approve_and_save_plan(
+            project=self.project,
+            user=self.user,
+            plan=self.valid_plan(),
         )
 
-        self.assertEqual(result["milestones_created"], 2)
-        self.assertEqual(result["tasks_created"], 3)
+        self.assertEqual(len(created_milestones), 2)
+        self.assertEqual(
+            sum(
+                milestone.tasks.count()
+                for milestone in created_milestones
+            ),
+            3,
+        )
 
         milestones = Milestone.objects.filter(
             project=self.project

@@ -120,7 +120,7 @@ class ProjectPlanTests(TestCase):
         with self.assertRaises(PermissionDenied):
             approve_and_save_plan(
                 project=self.project,
-                user=another_user,
+                user=self.user,
                 plan=plan,
             )
 
