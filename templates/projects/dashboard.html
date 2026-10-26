@@ -20,10 +20,17 @@
             <h1>Telix ShipShield</h1>
             <p class="muted">Your projects. Your execution plans. Your progress.</p>
         </div>
+
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Log out</button>
+        </form>
+
         <a class="button" href="{% url 'projects:create' %}">+ New project</a>
     </header>
 
     <h2>Your projects</h2>
+
 
     {% for project in projects %}
         <article class="project">
