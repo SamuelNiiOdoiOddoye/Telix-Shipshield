@@ -37,7 +37,7 @@ DEBUG = os.getenv("DEBUG","False").lower() == "true"
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv("ALLOWED HOSTS", "localhost, 127.0.0.1/9000").split(",")
+    for host in os.getenv("ALLOWED_HOSTS", "localhost, 127.0.0.1/9000").split(",")
     if host.strip()
 ]
 
@@ -51,6 +51,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'apps.projects.apps.ProjectsConfig',
+    'apps.planning.apps.PlanningConfig',
+    'apps.evidence.apps.EvidenceConfig',
+    'apps.assistant.apps.AssistantConfig',
+    'apps.integrations.apps.IntegrationsConfig',
 ]
 
 MIDDLEWARE = [

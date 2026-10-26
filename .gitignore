@@ -1,9 +1,10 @@
-@'
 .venv/
 __pycache__/
 *.py[cod]
-db.sqlite3
 .env
+.env.*
+!.env.example
+db.sqlite3
 .coverage
 htmlcov/
 .pytest_cache/
@@ -12,4 +13,3 @@ htmlcov/
 .vscode/
 staticfiles/
 media/
-'@ | Set-Content .gitignore
