@@ -282,14 +282,23 @@ def build_health_findings(details):
                 "" if present else section["recommendation"],
             )
 
+   
     # 3. Dependency manifest indicators
+    tree = details.get("full_tree") or []
+    tree_truncated = details.get("tree_truncated", False)
+    tree_error = details.get("tree_error", "") or ""
+    tree_complete = bool(tree) and not tree_truncated and not tree_error
+
     manifest_names = {
         "requirements.txt",
         "pyproject.toml",
         "pipfile",
         "pipfile.lock",
         "poetry.lock",
+        "pdm.lock",
+        "uv.lock",
         "package.json",
+        "package-lock.json",
         "pnpm-lock.yaml",
         "yarn.lock",
         "pubspec.yaml",
@@ -300,74 +309,150 @@ def build_health_findings(details):
         "build.gradle.kts",
         "composer.json",
     }
-    found_manifests = sorted(manifest_names.intersection(root_names))
+
+    found_manifests = sorted(
+        item["path"]
+        for item in tree
+        if item.get("type") == "blob"
+        and item.get("path", "").rsplit("/", 1)[-1].lower()
+        in manifest_names
+    )
+
+    if found_manifests:
+        manifest_status = "passed"
+        manifest_severity = "info"
+        manifest_summary = (
+            "Found dependency/build manifest(s): "
+            + ", ".join(found_manifests[:5])
+        )
+        manifest_evidence = [
+            {
+                "source_path": path,
+                "detail": "A recognized dependency or build manifest was detected.",
+            }
+            for path in found_manifests[:5]
+        ]
+        manifest_recommendation = (
+            "Review dependency versions and keep manifests up to date."
+        )
+    else:
+        manifest_status = "unverified"
+        manifest_severity = "medium"
+        manifest_summary = (
+            "No recognized dependency or build manifest was found in the "
+            "inspected repository tree."
+            if tree_complete
+            else "The repository tree is incomplete, so dependency manifests "
+                 "could not be ruled out."
+        )
+        manifest_evidence = [{
+            "source_path": "GitHub repository tree",
+            "detail": (
+                "The inspected tree was incomplete."
+                if not tree_complete
+                else "No recognized manifest path was detected."
+            ),
+        }]
+        manifest_recommendation = (
+            "If this is a software project, confirm how dependencies and "
+            "build steps are declared."
+        )
 
     add_finding(
         "dependency_manifest",
         "Development health",
         "Dependency manifest",
-        "passed" if found_manifests else "unverified",
-        "info" if found_manifests else "medium",
-        (
-            "Found dependency/build manifest(s): "
-            + ", ".join(found_manifests)
-            if found_manifests
-            else "No recognized dependency or build manifest was detected at the repository root."
-        ),
-        [{
-            "source_path": "Repository root listing",
-            "detail": (
-                ", ".join(found_manifests)
-                if found_manifests
-                else "Only root entries were checked; manifests may exist in subdirectories or this may not be a software project."
-            ),
-        }],
-        (
-            ""
-            if found_manifests
-            else "If this is a software project, confirm how dependencies and build steps are declared."
-        ),
+        manifest_status,
+        manifest_severity,
+        manifest_summary,
+        manifest_evidence,
+        manifest_recommendation,
     )
 
     # 4. Test indicators
-    test_names = [
-        name for name in root_names
-        if name in {"tests", "test", "__tests__"}
-        or name.startswith("test_")
-        or name.endswith("_test.py")
-        or name in {"pytest.ini", "tox.ini"}
-    ]
-    has_test_directory = any(
-        root_by_name[name].get("type") == "dir"
-        for name in test_names
-        if name in root_by_name
-    )
-    has_test_file = any(
-        root_by_name[name].get("type") == "file"
-        for name in test_names
-        if name in root_by_name
-    )
+    test_paths = []
 
-    if has_test_directory or has_test_file:
+    for item in tree:
+        path = item.get("path", "")
+        parts = path.lower().split("/")
+        filename = parts[-1]
+        is_file = item.get("type") == "blob"
+        is_directory = item.get("type") == "tree"
+
+        has_test_directory = any(
+            part in {"test", "tests", "__tests__"}
+            for part in parts[:-1] if is_file
+        ) or (
+            is_directory
+            and filename in {"test", "tests", "__tests__"}
+        )
+
+        has_test_filename = is_file and (
+            filename.startswith(("test_", "tests_", "spec_"))
+            or filename.endswith(
+                (
+                    "_test.py",
+                    ".test.js",
+                    ".test.jsx",
+                    ".test.ts",
+                    ".test.tsx",
+                    ".spec.js",
+                    ".spec.jsx",
+                    ".spec.ts",
+                    ".spec.tsx",
+                )
+            )
+            or filename in {
+                "pytest.ini",
+                "tox.ini",
+                "jest.config.js",
+                "jest.config.ts",
+                "vitest.config.js",
+                "vitest.config.ts",
+                "playwright.config.js",
+                "playwright.config.ts",
+                "cypress.config.js",
+                "cypress.config.ts",
+            }
+        )
+
+        if has_test_directory or has_test_filename:
+            test_paths.append(path)
+
+    test_paths = sorted(set(test_paths))
+
+    if test_paths:
         test_status = "passed"
         test_severity = "info"
         test_summary = (
-            "A likely test directory or test-related file was detected at the root."
+            "Test-related directories or files were detected: "
+            + ", ".join(test_paths[:5])
+            + ". Test execution was not performed."
         )
-        test_recommendation = (
-            "Run the test suite and record the command, result, and commit as verification evidence."
-        )
+        test_evidence = [
+            {
+                "source_path": path,
+                "detail": "A test-related path was detected in the repository tree.",
+            }
+            for path in test_paths[:5]
+        ]
     else:
         test_status = "unverified"
         test_severity = "medium"
         test_summary = (
-            "No obvious test indicator was detected among the root entries. "
-            "Nested test directories and test execution were not checked."
+            "No test indicators were found in the inspected repository tree."
+            if tree_complete
+            else "The repository tree is incomplete, so test indicators "
+                 "may have been missed."
         )
-        test_recommendation = (
-            "Inspect the full repository tree and identify the test suite. "
-            "If tests do not exist, add tests for critical behavior."
-        )
+        test_evidence = [{
+            "source_path": "GitHub repository tree",
+            "detail": (
+                "The inspected tree was incomplete."
+                if not tree_complete
+                else "No matching test-related paths were detected."
+            ),
+        }]
 
     add_finding(
         "test_presence",
@@ -376,49 +461,75 @@ def build_health_findings(details):
         test_status,
         test_severity,
         test_summary,
-        [{
-            "source_path": "Repository root listing",
-            "detail": (
-                ", ".join(test_names)
-                if test_names
-                else "No matching test-related root entry was detected."
-            ),
-        }],
-        test_recommendation,
+        test_evidence,
+        "Run the test suite and record the command, result, and commit as "
+        "verification evidence. If tests do not exist, add tests for critical behavior.",
     )
 
     # 5. Continuous integration indicators
-    ci_names = {
-        ".github",
+    ci_paths = []
+
+    ci_root_files = {
         ".gitlab-ci.yml",
-        ".circleci",
+        ".circleci/config.yml",
         "azure-pipelines.yml",
         "jenkinsfile",
         "bitbucket-pipelines.yml",
+        ".travis.yml",
     }
-    found_ci = sorted(ci_names.intersection(root_names))
 
-    if found_ci:
+    for item in tree:
+        path = item.get("path", "")
+        normalized_path = path.lower()
+
+        is_workflow_file = (
+            normalized_path.startswith(".github/workflows/")
+            and item.get("type") == "blob"
+        )
+
+        is_ci_config = (
+            normalized_path in ci_root_files
+            and item.get("type") == "blob"
+        )
+
+        if is_workflow_file or is_ci_config:
+            ci_paths.append(path)
+
+    ci_paths = sorted(set(ci_paths))
+
+    if ci_paths:
         ci_status = "passed"
         ci_severity = "info"
         ci_summary = (
-            "A possible CI configuration location or file was detected at the root."
+            "CI/CD configuration files were detected: "
+            + ", ".join(ci_paths[:5])
+            + ". Workflow execution was not verified."
         )
-        ci_recommendation = (
-            "Inspect the configuration and confirm that workflows run successfully "
-            "for the default branch."
-        )
+        ci_evidence = [
+            {
+                "source_path": path,
+                "detail": "A CI/CD configuration file was detected.",
+            }
+            for path in ci_paths[:5]
+        ]
     else:
         ci_status = "unverified"
         ci_severity = "low"
         ci_summary = (
-            "No recognized CI indicator was detected among the root entries. "
-            "External CI services and nested configuration were not checked."
+            "No recognized CI/CD configuration was found in the inspected "
+            "repository tree."
+            if tree_complete
+            else "The repository tree is incomplete, so CI/CD configuration "
+                 "may have been missed."
         )
-        ci_recommendation = (
-            "If automated verification is needed, configure CI to run tests and "
-            "basic quality checks on changes."
-        )
+        ci_evidence = [{
+            "source_path": "GitHub repository tree",
+            "detail": (
+                "The inspected tree was incomplete."
+                if not tree_complete
+                else "No recognized CI/CD configuration files were detected."
+            ),
+        }]
 
     add_finding(
         "ci_presence",
@@ -427,25 +538,20 @@ def build_health_findings(details):
         ci_status,
         ci_severity,
         ci_summary,
-        [{
-            "source_path": "Repository root listing",
-            "detail": (
-                ", ".join(found_ci)
-                if found_ci
-                else "No recognized CI root entry was detected."
-            ),
-        }],
-        ci_recommendation,
+        ci_evidence,
+        "Inspect the configuration and verify that automated workflows run "
+        "successfully for the default branch.",
     )
+
 
     return findings
 
-
 @login_required
 @require_POST
 
 @login_required
 @require_POST
+
 def repository_audit(request, project_id, repository_id):
     project = _owned_project(project_id, request.user)
 
@@ -483,9 +589,10 @@ def repository_audit(request, project_id, repository_id):
             f"Health audit completed for {details.get('full_name', repository)}. "
             f"{passed_count} passed, {failed_count} failed, "
             f"{unverified_count} unverified. "
-            "Checks are based on repository metadata, root entries, "
-            "and retrieved README content; tests were not executed."
+            "Checks are based on repository metadata, the inspected repository tree, "
+            "and retrieved README content; tests and CI workflows were not executed."
         )
+        
         audit.findings = findings
         audit.completed_at = timezone.now()
         audit.save(

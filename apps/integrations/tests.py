@@ -17,6 +17,14 @@ class RepositoryHealthAuditTests(SimpleTestCase):
                 {"name": "tests", "type": "dir", "path": "tests"},
                 {"name": ".github", "type": "dir", "path": ".github"},
             ],
+            "full_tree" : [
+                {"path" : "README.md", "type" : "blob"},
+                {"path" : "backend/pyproject.toml", "type":"blob"},
+                {"path" : "apps/example/tests/test_example.py", "type":"blob"},
+                {"path" : ".github/workflows/ci.yml", "type" : "blob"},
+            ],
+            "tree_truncated" : False,
+            "tree_error" : "",
             "readme": (
                 "# Example Project\n\n"
                 "## Installation and Setup\n"
@@ -47,11 +55,39 @@ class RepositoryHealthAuditTests(SimpleTestCase):
         self.assertEqual(by_id["readme_usage"]["status"], "failed")
         self.assertEqual(by_id["readme_testing"]["status"], "failed")
 
+    
     def test_missing_test_indicators_are_unverified_not_failed(self):
+        details = {
+            **self.details,
+            "root_files": [
+                {"name": "README.md", "type": "file", "path": "README.md"},
+            ],
+            "full_tree": [
+                {"path": "README.md", "type": "blob"},
+            ],
+            "tree_truncated": False,
+            "tree_error": "",
+        }
+
+        findings = build_health_findings(details)
+        by_id = {finding["id"]: finding for finding in findings}
+
+        self.assertEqual(by_id["test_presence"]["status"], "unverified")
+        self.assertTrue(by_id["test_presence"]["recommendation"])
+
+        details = {
+            **self.details,
+            "full_tree" : [
+                {"path": "README.md", "type":"blob"},
+            ],
+            "tree_truncated":False,
+            "tree_error":"",
+        }
+        
         self.details["root_files"] = [
             {"name": "README.md", "type": "file", "path": "README.md"},
         ]
-        findings = build_health_findings(self.details)
+        findings = build_health_findings(details)
         by_id = {finding["id"]: finding for finding in findings}
 
         self.assertEqual(by_id["test_presence"]["status"], "unverified")
@@ -83,3 +119,67 @@ class RepositoryHealthAuditTests(SimpleTestCase):
             self.assertTrue(finding["evidence"])
             self.assertIn("summary", finding)
             self.assertIn("recommendation", finding)
+
+    def test_detects_nested_dependency_manifest(self):
+        findings = build_health_findings(self.details)
+        manifest = next(
+            item for item in findings
+            if item["id"] == "dependency_manifest"
+        )
+
+        self.assertEqual(manifest["status"], "passed")
+        self.assertTrue(
+            any(
+                evidence["source_path"] == "backend/pyproject.toml"
+                for evidence in manifest["evidence"]
+            )
+        )
+
+    def test_detects_nested_test_file(self):
+        findings = build_health_findings(self.details)
+        tests = next(
+            item for item in findings
+            if item["id"] == "test_presence"
+        )
+
+        self.assertEqual(tests["status"], "passed")
+        self.assertTrue(
+            any(
+                evidence["source_path"]
+                == "apps/example/tests/test_example.py"
+                for evidence in tests["evidence"]
+            )
+        )
+
+    def test_detects_github_actions_workflow(self):
+        findings = build_health_findings(self.details)
+        ci = next(
+            item for item in findings
+            if item["id"] == "ci_presence"
+        )
+
+        self.assertEqual(ci["status"], "passed")
+        self.assertTrue(
+            any(
+                evidence["source_path"] == ".github/workflows/ci.yml"
+                for evidence in ci["evidence"]
+            )
+        )
+
+    def test_incomplete_tree_does_not_claim_indicators_are_absent(self):
+        details = {
+            **self.details,
+            "full_tree": [],
+            "tree_truncated": True,
+        }
+
+        findings = build_health_findings(details)
+        relevant_ids = {
+            "dependency_manifest",
+            "test_presence",
+            "ci_presence",
+        }
+
+        for finding in findings:
+            if finding["id"] in relevant_ids:
+                self.assertEqual(finding["status"], "unverified")
