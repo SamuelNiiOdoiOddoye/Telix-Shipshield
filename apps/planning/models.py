@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings 
 from django.db import models
 
 class Milestone(models.Model):
@@ -104,3 +105,38 @@ class AcceptanceCriterion(models.Model):
         
     def __str__(self):
         return self.description
+    
+
+
+class ProjectPlan(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        APPROVED = "approved", "Approved"
+
+    project = models.OneToOneField(
+        "projects.Project",
+        on_delete=models.CASCADE,
+        related_name="plan_draft",
+    )
+    plan = models.JSONField(default=dict)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+    )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_shipshield_plans",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"Plan for {self.project.name} ({self.status})"

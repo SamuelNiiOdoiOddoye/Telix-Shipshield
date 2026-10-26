@@ -3,11 +3,12 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.assistant.services import PlanValidationError, validate_project_plan
-from apps.planning.models import AcceptanceCriterion, Milestone, Task
+from apps.planning.models import AcceptanceCriterion, Milestone, ProjectPlan ,Task
 from apps.projects.models import Project
 
 
 class ProjectPlanTests(TestCase):
+    
     def setUp(self):
         User = get_user_model()
         self.user = User.objects.create_user(
@@ -176,3 +177,38 @@ class ProjectPlanTests(TestCase):
         self.assertEqual(Milestone.objects.filter(project=self.project).count(), 0)
         self.assertEqual(Task.objects.count(), 0)
         self.assertEqual(AcceptanceCriterion.objects.count(), 0)
+
+    def test_project_plan_starts_as_an_editable_draft(self):
+        plan_data ={
+            "milestones" : [
+                {
+                    "title": "Build the dashboard",
+                    "tasks": [
+                        {
+                            "title" : "Build the dashboard",
+                            "priority" : "high",
+                            "acceptance_criteria" : [
+                                "The dashboard renders correctly",
+                            ],
+                        }
+                    ],
+                }
+            ]
+        }
+        
+        draft = ProjectPlan.objects.create(
+            project=self.project,
+            plan=plan_data,
+        )
+        
+        draft.refresh_from_db()
+        
+        self.assertEqual(draft.status, ProjectPlan.Status.DRAFT)
+        self.assertEqual(draft.plan, plan_data)
+        self.assertIsNone(draft.approved_by)
+        self.assertIsNone(draft.approved_at)
+        
+        self.assertEqual(
+            Milestone.objects.filter(project=self.project).count(),
+            0,
+        )
