@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.db import transaction
 
 from apps.projects.models import Project
 from apps.integrations.models import Repository, AuditRun
@@ -26,9 +27,88 @@ def _owned_project(project_id, user):
 
 
 @login_required
+
+@login_required
 def repository_connect(request, project_id):
     project = _owned_project(project_id, request.user)
     error = None
+
+    repository = Repository.objects.filter(
+        project=project,
+        is_active=True,
+    ).first()
+
+    if request.method == "POST":
+        repository_url = request.POST.get("repository_url", "").strip()
+
+        try:
+            owner, name = parse_github_url(repository_url)
+            details = inspect_repository(owner, name)
+            canonical_url = details["html_url"].rstrip("/")
+
+            with transaction.atomic():
+                # Reuse an existing record for this project and repository.
+                repository = Repository.objects.filter(
+                    project=project,
+                    repository_url__iexact=canonical_url,
+                ).first()
+
+                # This MVP permits one active repository per project.
+                Repository.objects.filter(
+                    project=project,
+                    is_active=True,
+                ).exclude(
+                    pk=repository.pk if repository else None,
+                ).update(is_active=False)
+
+                if repository is None:
+                    repository = Repository.objects.create(
+                        project=project,
+                        repository_url=canonical_url,
+                        provider="github",
+                        owner_name=owner,
+                        repository_name=name,
+                        default_branch=details.get("default_branch", ""),
+                        is_active=True,
+                        connected_by=request.user,
+                    )
+                else:
+                    repository.provider = "github"
+                    repository.owner_name = owner
+                    repository.repository_name = name
+                    repository.default_branch = details.get(
+                        "default_branch", ""
+                    )
+                    repository.is_active = True
+                    repository.connected_by = request.user
+                    repository.save()
+
+            return redirect(
+                "integrations:repository_detail",
+                project_id=project.pk,
+                repository_id=repository.pk,
+            )
+
+        except GitHubIntegrationError as exc:
+            error = str(exc)
+
+    return render(
+        request,
+        "integrations/repository_connect.html",
+        {
+            "project": project,
+            "repository": repository,
+            "error": error,
+        },
+    )
+
+    project = _owned_project(project_id, request.user)
+    error = None
+    
+    repository = Repository.objects.filter(
+        project=project,
+        is_active = True,
+    ).first()
 
     if request.method == "POST":
         repository_url = request.POST.get("repository_url", "").strip()

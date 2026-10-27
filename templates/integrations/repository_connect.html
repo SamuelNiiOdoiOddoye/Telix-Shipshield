@@ -1,5 +1,89 @@
+```django
 {% extends 'base.html' %}
-{% block title %}Connect GitHub · {{ project.name }}{% endblock %}
+{% block title %}GitHub Repository · {{ project.name }}{% endblock %}
+
 {% block content %}
-<main class="shell page"><div class="form-panel"><a class="muted" href="{% url 'projects:detail' project_id=project.pk %}">← Back to project</a><div class="eyebrow" style="margin-top:24px">REPOSITORY INTEGRATION</div><h1>Connect your codebase.</h1><p class="muted">Link a GitHub repository to {{ project.name }}. ShipShield will inspect available metadata, documentation, manifests, tests and CI configuration.</p><section class="panel">{% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}<form method="post" class="form-grid">{% csrf_token %}<label for="repository_url">GitHub repository URL<input id="repository_url" name="repository_url" type="url" placeholder="https://github.com/owner/repository" required value="{{ request.POST.repository_url|default:'' }}"></label><p class="field-help">Private repositories require a valid GitHub token configured by the project operator. Never paste a token into this form.</p><button type="submit">Connect repository ↗</button></form></section></div></main>
+<main class="shell page">
+    <div class="form-panel">
+        <a class="muted" href="{% url 'projects:detail' project_id=project.pk %}">
+            ← Back to project
+        </a>
+
+        <div class="eyebrow" style="margin-top:24px">
+            REPOSITORY INTEGRATION
+        </div>
+
+        <h1>{% if repository %}Your connected repository{% else %}Connect your codebase.{% endif %}</h1>
+
+        <p class="muted">
+            Link one GitHub repository to {{ project.name }}.
+            ShipShield saves the connection to this project so you can return
+            without entering the URL every time.
+        </p>
+
+        <section class="panel">
+            {% if error %}
+                <div class="alert" role="alert">{{ error }}</div>
+            {% endif %}
+
+            {% if repository %}
+                <div>
+                    <div class="eyebrow">SAVED REPOSITORY</div>
+                    <p>
+                        <strong>{{ repository.owner_name }}/{{ repository.repository_name }}</strong>
+                    </p>
+                    <p>
+                        <a href="{{ repository.repository_url }}"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            {{ repository.repository_url }}
+                        </a>
+                    </p>
+                    <p class="field-help">
+                        Default branch:
+                        {{ repository.default_branch|default:"Not detected" }}
+                    </p>
+                    <a class="button"
+                       href="{% url 'integrations:repository_detail' project_id=project.pk repository_id=repository.pk %}">
+                        View repository details →
+                    </a>
+                </div>
+
+                <hr>
+
+                <h2>Replace repository</h2>
+                <p class="muted">
+                    Connecting a different repository will replace the active
+                    connection for this project.
+                </p>
+            {% endif %}
+
+            <form method="post" class="form-grid">
+                {% csrf_token %}
+
+                <label for="repository_url">
+                    GitHub repository URL
+                    <input
+                        id="repository_url"
+                        name="repository_url"
+                        type="url"
+                        placeholder="https://github.com/owner/repository"
+                        required
+                        value="{{ request.POST.repository_url|default:'' }}"
+                    >
+                </label>
+
+                <p class="field-help">
+                    Private repositories require a valid GitHub token configured
+                    by the project operator. Never paste a token into this form.
+                </p>
+
+                <button type="submit">
+                    {% if repository %}Replace repository{% else %}Connect repository{% endif %} ↗
+                </button>
+            </form>
+        </section>
+    </div>
+</main>
 {% endblock %}
+```
