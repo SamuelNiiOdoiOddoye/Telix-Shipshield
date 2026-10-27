@@ -326,3 +326,6 @@ small, .eyebrow { text-wrap: pretty; }
   .projects-title h2 { font-size: 20px; }
   .project-card-bottom { align-items: flex-start; flex-direction: column; }
 }
+
+.brand-emblem { display: block; width: 27px; height: 27px; }
+@media (max-width: 480px) { .brand-emblem { width: 24px; height: 24px; } }
