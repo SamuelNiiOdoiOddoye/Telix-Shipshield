@@ -579,26 +579,6 @@ def build_health_findings(details):
         "its conclusion as verification evidence.",
     )
 
-    
-    # Detecting test files does not prove that tests pass.
-    add_finding(
-        "test_execution",
-        "Verification",
-        "Test execution",
-        "unverified",
-        "medium",
-        "The repository audit did not execute the project's tests or "
-        "retrieve evidence of a successful test run.",
-        [{
-            "source_path": "Repository audit",
-            "detail": "File discovery does not prove that tests pass.",
-        }],
-        "Run the test suite in a suitable environment and record the command, "
-        "result, and commit as verification evidence.",
-    )
-
-
-
     return findings
 
 @login_required

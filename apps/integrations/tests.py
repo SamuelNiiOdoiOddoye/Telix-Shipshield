@@ -1,4 +1,14 @@
 
+import os
+from unittest.mock import Mock, patch
+
+from django.core.exceptions import ImproperlyConfigured
+
+from apps.integrations.services import (
+    GitHubIntegrationError,
+    _github_get,
+)
+
 from django.test import SimpleTestCase
 
 from apps.integrations.views import build_health_findings
@@ -120,6 +130,16 @@ class RepositoryHealthAuditTests(SimpleTestCase):
             self.assertIn("summary", finding)
             self.assertIn("recommendation", finding)
 
+    def test_finding_ids_are_unique(self):
+        findings = build_health_findings(self.details)
+        finding_ids = [finding["id"] for finding in findings]
+
+        self.assertEqual(
+            len(finding_ids),
+            len(set(finding_ids)),
+            "Each repository health finding must have a unique ID.",
+        )
+
     def test_detects_nested_dependency_manifest(self):
         findings = build_health_findings(self.details)
         manifest = next(
@@ -166,7 +186,6 @@ class RepositoryHealthAuditTests(SimpleTestCase):
             )
         )
 
-
     def test_detecting_test_files_does_not_claim_tests_passed(self):
         findings = build_health_findings(self.details)
         by_id = {finding["id"]: finding for finding in findings}
@@ -180,7 +199,6 @@ class RepositoryHealthAuditTests(SimpleTestCase):
 
         self.assertEqual(by_id["ci_presence"]["status"], "passed")
         self.assertEqual(by_id["ci_execution"]["status"], "unverified")
-
 
     def test_incomplete_tree_does_not_claim_indicators_are_absent(self):
         details = {
@@ -199,3 +217,127 @@ class RepositoryHealthAuditTests(SimpleTestCase):
         for finding in findings:
             if finding["id"] in relevant_ids:
                 self.assertEqual(finding["status"], "unverified")
+
+
+class GitHubAPIErrorHandlingTests(SimpleTestCase):
+    """Test GitHub API handling without making real HTTP requests."""
+
+    def setUp(self):
+        self.environment = patch.dict(
+            os.environ,
+            {"GITHUB_TOKEN": "test-token"},
+        )
+        self.environment.start()
+        self.addCleanup(self.environment.stop)
+
+    @patch("apps.integrations.services.requests.get")
+    def test_successful_response_returns_json(self, mock_get):
+        response = Mock()
+        response.status_code = 200
+        response.ok = True
+        response.json.return_value = {"full_name": "owner/repository"}
+        response.headers = {}
+        mock_get.return_value = response
+
+        result = _github_get("/repos/owner/repository")
+
+        self.assertEqual(
+            result,
+            {"full_name": "owner/repository"},
+        )
+        mock_get.assert_called_once()
+
+    @patch("apps.integrations.services.requests.get")
+    def test_401_reports_invalid_token(self, mock_get):
+        response = Mock()
+        response.status_code = 401
+        response.headers = {}
+        mock_get.return_value = response
+
+        with self.assertRaisesMessage(
+            GitHubIntegrationError,
+            "GitHub rejected the token",
+        ):
+            _github_get("/user")
+
+    @patch("apps.integrations.services.requests.get")
+    def test_403_reports_insufficient_permissions(self, mock_get):
+        response = Mock()
+        response.status_code = 403
+        response.headers = {"X-RateLimit-Remaining": "10"}
+        mock_get.return_value = response
+
+        with self.assertRaisesMessage(
+            GitHubIntegrationError,
+            "GitHub denied access",
+        ):
+            _github_get("/repos/owner/repository")
+
+    @patch("apps.integrations.services.requests.get")
+    def test_403_rate_limit_is_identified(self, mock_get):
+        response = Mock()
+        response.status_code = 403
+        response.headers = {
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": "1900000000",
+        }
+        mock_get.return_value = response
+
+        with self.assertRaisesMessage(
+            GitHubIntegrationError,
+            "GitHub API rate limit reached",
+        ):
+            _github_get("/user")
+
+    @patch("apps.integrations.services.requests.get")
+    def test_429_reports_retry_after(self, mock_get):
+        response = Mock()
+        response.status_code = 429
+        response.headers = {"Retry-After": "30"}
+        mock_get.return_value = response
+
+        with self.assertRaisesMessage(
+            GitHubIntegrationError,
+            "retry after 30 seconds",
+        ):
+            _github_get("/user")
+
+    @patch("apps.integrations.services.requests.get")
+    def test_missing_token_is_rejected(self, mock_get):
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaisesMessage(
+                ImproperlyConfigured,
+                "GITHUB_TOKEN is missing",
+            ):
+                _github_get("/user")
+
+        mock_get.assert_not_called()
+        
+    @patch("apps.integrations.services.requests.get")
+    def test_network_error_is_wrapped(self, mock_get):
+        import requests
+
+        mock_get.side_effect = requests.RequestException(
+            "connection failed"
+        )
+
+        with self.assertRaisesMessage(
+            GitHubIntegrationError,
+            "Could not reach GitHub",
+        ):
+            _github_get("/user")
+
+    @patch("apps.integrations.services.requests.get")
+    def test_invalid_json_is_wrapped(self, mock_get):
+        response = Mock()
+        response.status_code = 200
+        response.ok = True
+        response.json.side_effect = ValueError("invalid JSON")
+        response.headers = {}
+        mock_get.return_value = response
+
+        with self.assertRaisesMessage(
+            GitHubIntegrationError,
+            "unexpected response",
+        ):
+            _github_get("/user")

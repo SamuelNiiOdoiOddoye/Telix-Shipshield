@@ -46,6 +46,8 @@ def parse_github_url(repository_url):
     return owner, name
 
 
+
+
 def _github_get(path):
     token = os.getenv("GITHUB_TOKEN")
 
@@ -69,24 +71,44 @@ def _github_get(path):
             "Could not reach GitHub. Check your internet connection and try again."
         ) from exc
 
-    if response.status_code == 404:
+    status_code = response.status_code
+
+    if status_code == 401:
         raise GitHubIntegrationError(
-            "Repository not found or your token cannot access it."
+            "GitHub rejected the token. Check that GITHUB_TOKEN is valid."
         )
 
-    if response.status_code == 401:
+    if status_code == 404:
         raise GitHubIntegrationError(
-            "GitHub rejected the token. Check GITHUB_TOKEN."
+            "Repository or resource not found, or your token cannot access it."
         )
 
-    if response.status_code == 403:
+    if status_code in (403, 429):
+        remaining = response.headers.get("X-RateLimit-Remaining")
+        reset = response.headers.get("X-RateLimit-Reset")
+        retry_after = response.headers.get("Retry-After")
+
+        if retry_after:
+            raise GitHubIntegrationError(
+                f"GitHub asked us to retry after {retry_after} seconds."
+            )
+
+        if remaining == "0" or status_code == 429:
+            message = "GitHub API rate limit reached."
+            if reset:
+                message += (
+                    f" The rate limit resets at Unix timestamp {reset}."
+                )
+            raise GitHubIntegrationError(message)
+
         raise GitHubIntegrationError(
-            "GitHub denied the request or a rate limit was reached."
+            "GitHub denied access. Check the token's repository permissions "
+            "and whether the account can access this repository."
         )
 
     if not response.ok:
         raise GitHubIntegrationError(
-            f"GitHub returned HTTP {response.status_code}."
+            f"GitHub returned HTTP {status_code}."
         )
 
     try:
@@ -96,8 +118,6 @@ def _github_get(path):
             "GitHub returned an unexpected response."
         ) from exc
 
-
-def inspect_repository_tree(base_path, latest_commit_sha):
     """Retrieve repository paths from the latest commit's recursive Git tree.
 
     Return a bounded list of entries, whether the tree was truncated,
