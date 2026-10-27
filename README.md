@@ -1,18 +1,33 @@
-# Telix-Shipshield
-
-Telix Shipshield is a universal project execution, verification, and delivery platform that transforms ideas into actionable, trackable projects. It helps individuals and teams plan roadmaps, manage tasks and resources, monitor progress, identify risks, preserve project knowledge, and verify outcomes with evidence.
-
-# Telix ShipShield
+# Telix ShipShield 🛡️
 
 **Plan clearly. Execute confidently. Verify progress. Deliver with proof.**
 
-Telix ShipShield is a project planning, execution, and delivery-readiness platform designed to help people turn ideas into structured, verifiable outcomes.
+Telix ShipShield is a project execution, verification, and delivery-readiness platform that transforms project ideas into structured plans, actionable milestones, trackable tasks, and evidence-backed outcomes.
 
-Whether you're building software, launching a business, organizing an event, managing a research initiative, or coordinating another kind of project, ShipShield aims to provide a clear view of what needs to happen, what has been completed, what remains blocked, and what evidence supports the final result.
+Built with Django for the Alan AI hackathon, ShipShield focuses on a fundamental problem: **a task marked complete is not necessarily a task that has been verified.**
 
-> From ideas to verified delivery—for software, teams, and every kind of project.
+ShipShield connects project planning, execution tracking, risk management, evidence records, and GitHub repository inspection in one workspace. Its long-term vision is to support projects of every kind, starting with software development.
 
----
+### 🚀 Try the project
+
+- **Live application:** https://telix-shipshield.onrender.com
+- **GitHub repository:** https://github.com/SamuelNiiOdoiOddoye/Telix-Shipshield
+- **Hackathon demo and announcement:** https://x.com/oddoye_samuel/status/2114754319404949536
+
+### ✨ What makes ShipShield different?
+
+Traditional project tracking often relies on status labels and progress percentages. ShipShield aims to connect those reports to acceptance criteria, evidence, identified risks, and repository findings.
+
+Its guiding principle is simple:
+
+> Reported progress is not the same as verified delivery.
+
+### 🎯 Current MVP
+
+The shipped MVP includes account registration and authentication, project creation, editable execution plans, plan validation and approval, milestone and task tracking, risk management, evidence records, and GitHub repository inspection.
+
+The implementation is an early foundation. Advanced AI-generated planning, automated test execution, and comprehensive delivery verification remain future development goals.
+
 
 ## The Problem
 
