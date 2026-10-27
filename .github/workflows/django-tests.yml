@@ -2,7 +2,6 @@
 
 on:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -10,6 +9,31 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: telix_shipshield
+          POSTGRES_USER: shipshield_app
+          POSTGRES_PASSWORD: ci-test-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U shipshield_app -d telix_shipshield"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SECRET_KEY: ci-only-not-a-production-secret
+      DEBUG: "False"
+      ALLOWED_HOSTS: 127.0.0.1,localhost
+      DB_NAME: telix_shipshield
+      DB_USER: shipshield_app
+      DB_PASSWORD: ci-test-password
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5432"
 
     steps:
       - name: Check out repository
@@ -28,13 +52,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Check Django configuration
-        env:
-          SECRET_KEY: ci-only-not-a-production-secret
-          DEBUG: "True"
         run: python manage.py check
 
       - name: Run Django tests
-        env:
-          SECRET_KEY: ci-only-not-a-production-secret
-          DEBUG: "True"
         run: python manage.py test
