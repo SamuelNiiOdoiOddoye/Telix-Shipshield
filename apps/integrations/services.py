@@ -46,8 +46,6 @@ def parse_github_url(repository_url):
     return owner, name
 
 
-
-
 def _github_get(path):
     token = os.getenv("GITHUB_TOKEN")
 
@@ -156,6 +154,53 @@ def _github_get(path):
         ]
 
         was_truncated = bool(tree_data.get("truncated")) or len(entries) > limit
+
+        return normalized_entries, was_truncated, ""
+
+    except GitHubIntegrationError as exc:
+        return [], False, str(exc)
+
+
+def inspect_repository_tree(base_path, latest_commit_sha):
+    """Retrieve repository paths from the latest commit's recursive Git tree.
+
+    Return a bounded list of entries, whether the tree was truncated,
+    and an error message if the tree could not be inspected.
+    """
+    if not latest_commit_sha:
+        return [], False, "No commit SHA was available to inspect the tree."
+
+    try:
+        commit_data = _github_get(
+            f"{base_path}/git/commits/{latest_commit_sha}"
+        )
+        tree_sha = commit_data.get("tree", {}).get("sha")
+
+        if not tree_sha:
+            return [], False, "GitHub did not return a tree SHA."
+
+        tree_data = _github_get(
+            f"{base_path}/git/trees/{tree_sha}?recursive=1"
+        )
+        entries = tree_data.get("tree", [])
+
+        if not isinstance(entries, list):
+            return [], False, "GitHub returned an unexpected tree structure."
+
+        limit = 5000
+        normalized_entries = [
+            {
+                "path": entry.get("path", ""),
+                "type": entry.get("type", ""),
+                "size": entry.get("size"),
+            }
+            for entry in entries[:limit]
+            if isinstance(entry, dict) and entry.get("path")
+        ]
+
+        was_truncated = (
+            bool(tree_data.get("truncated")) or len(entries) > limit
+        )
 
         return normalized_entries, was_truncated, ""
 
