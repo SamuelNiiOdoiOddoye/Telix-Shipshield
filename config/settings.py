@@ -141,6 +141,14 @@ USE_TZ = True
 # Keep this absolute: a relative URL breaks static assets on nested routes such as /accounts/login/.
 STATIC_URL = '/static/'
 
+# The app's shared stylesheet lives in the repository-level static/ directory,
+# not inside an individual Django app. Register that directory explicitly so
+# Django's staticfiles finders can locate it during local development and collectstatic.
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Destination used by collectstatic for deployment.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
