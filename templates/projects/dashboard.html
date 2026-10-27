@@ -1,45 +1,134 @@
+
 {% extends 'base.html' %}
-{% block title %}Workspace · Telix ShipShield{% endblock %}
+{% block title %}Workspace - Telix ShipShield{% endblock %}
+
 {% block content %}
-<main class="shell page">
-    
-<div class="page-head">
-    <div>
-        <div class="eyebrow">TELIX SHIPSHIELD / WORKSPACE</div>
-        <h1>Make progress visible.</h1>
-        <p>
-            Your projects, execution plans, and delivery evidence
-            in one workspace.
-        </p>
-    </div>
-    <div class="actions">
-        <a class="button" href="{% url 'projects:create' %}">
-            + New project
-        </a>
-    </div>
-</div>
+<main class="shell page workspace-page">
+    <section class="workspace-hero">
+        <div class="workspace-hero-copy">
+            <div class="eyebrow">
+                <span class="live-dot"></span> YOUR WORKSPACE
+            </div>
+            <h1>Make progress visible.</h1>
+            <p>One clear view of your plans, execution, and evidence — so you know what is moving, what is blocked, and what is truly done.</p>
+        </div>
 
+        <div class="workspace-hero-action">
+            <span class="hero-caption">READY WHEN YOU ARE</span>
+            <a class="button" href="{% url 'projects:create' %}">
+                <span aria-hidden="true">+</span> New project
+            </a>
+        </div>
 
-    <div class="grid stats">
-        <div class="stat-card"><div class="eyebrow">ACTIVE PROJECTS</div><div class="stat-value">{{ active_count }}</div><div class="muted">Projects in motion</div></div>
-        <div class="stat-card"><div class="eyebrow">TRACKED TASKS</div><div class="stat-value">{{ task_count }}</div><div class="muted">Across your workspace</div></div>
-        <div class="stat-card"><div class="eyebrow">COMPLETED TASKS</div><div class="stat-value">{{ completed_task_count }}</div><div class="muted">Recorded as done</div></div>
-    </div>
-    <div class="section-title"><h2>Your projects</h2><span class="muted">{{ projects|length }} total</span></div>
-    {% if projects %}
-    <div class="grid projects">
-        {% for project in projects %}
-        <article class="project-card">
-            <div class="card-top"><span class="project-type">{{ project.get_project_type_display }}</span><span class="status status-{{ project.status }}">{{ project.get_status_display }}</span></div>
-            <div><h3><a href="{% url 'projects:detail' project_id=project.pk %}">{{ project.name }}</a></h3><p class="muted">{{ project.description|default:project.goal|default:'Define the outcome and build your execution plan.'|truncatechars:135 }}</p></div>
-            <div><div class="progress-meta"><span>Execution progress</span><strong>{{ project.progress_percent }}%</strong></div><div class="progress"><span style="width:{{ project.progress_percent }}%"></span></div></div>
-            <div class="card-top"><span class="muted">{{ project.completed_tasks }} of {{ project.total_tasks }} tasks done</span><a href="{% url 'projects:detail' project_id=project.pk %}">Open project →</a></div>
-            {% if project.target_date %}<small>Target · {{ project.target_date|date:'M j, Y' }}</small>{% endif %}
-        </article>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty"><div class="empty-mark">✳</div><h2>Your next idea starts here.</h2><p class="muted">Create a project for a product, business, personal goal, research initiative, or any other outcome you want to deliver.</p><a class="button" href="{% url 'projects:create' %}">Create your first project →</a></div>
-    {% endif %}
+        <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
+        <div class="hero-orbit hero-orbit-two" aria-hidden="true"></div>
+    </section>
+
+    <section aria-label="Workspace overview">
+        <div class="section-kicker">
+            AT A GLANCE <span>— Live workspace totals</span>
+        </div>
+
+        <div class="grid stats">
+            <div class="stat-card stat-active">
+                <div class="stat-card-top">
+                    <span class="stat-icon" aria-hidden="true">↗</span>
+                    <span class="eyebrow">ACTIVE PROJECTS</span>
+                </div>
+                <div class="stat-value">{{ active_count }}</div>
+                <div class="muted">Projects in motion</div>
+            </div>
+
+            <div class="stat-card stat-tasks">
+                <div class="stat-card-top">
+                    <span class="stat-icon" aria-hidden="true">☷</span>
+                    <span class="eyebrow">TRACKED TASKS</span>
+                </div>
+                <div class="stat-value">{{ task_count }}</div>
+                <div class="muted">Across your workspace</div>
+            </div>
+
+            <div class="stat-card stat-done">
+                <div class="stat-card-top">
+                    <span class="stat-icon" aria-hidden="true">✓</span>
+                    <span class="eyebrow">COMPLETED TASKS</span>
+                </div>
+                <div class="stat-value">{{ completed_task_count }}</div>
+                <div class="muted">Recorded as done</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="projects-section" aria-labelledby="projects-heading">
+        <div class="section-title projects-title">
+            <div>
+                <div class="section-kicker">YOUR PORTFOLIO</div>
+                <h2 id="projects-heading">Projects</h2>
+            </div>
+            <span class="count-pill">{{ projects|length }} total</span>
+        </div>
+
+        {% if projects %}
+        <div class="grid projects">
+            {% for project in projects %}
+            <article class="project-card">
+                <div class="card-top">
+                    <span class="project-type">{{ project.get_project_type_display }}</span>
+                    <span class="status status-{{ project.status }}">{{ project.get_status_display }}</span>
+                </div>
+
+                <div class="project-card-main">
+                    <h3>
+                        <a href="{% url 'projects:detail' project_id=project.pk %}">{{ project.name }}</a>
+                    </h3>
+                    <p class="muted">{{ project.description|default:project.goal|default:'Define the outcome and build your execution plan.'|truncatechars:135 }}</p>
+                </div>
+
+                <div class="project-progress-block">
+                    <div class="progress-meta">
+                        <span>Execution progress</span>
+                        <strong>{{ project.progress_percent }}%</strong>
+                    </div>
+                    <div class="progress"
+                         role="progressbar"
+                         aria-label="{{ project.name }} execution progress"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
+                         aria-valuenow="{{ project.progress_percent }}">
+                        <span style="width:{{ project.progress_percent }}%"></span>
+                    </div>
+                </div>
+
+                <div class="project-card-bottom">
+                    <span class="muted">
+                        <strong>{{ project.completed_tasks }}</strong>
+                        of {{ project.total_tasks }} tasks done
+                    </span>
+                    <a class="project-open-link" href="{% url 'projects:detail' project_id=project.pk %}">
+                        View project <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+
+                {% if project.target_date %}
+                <div class="project-date">
+                    <span aria-hidden="true">◷</span>
+                    Target — {{ project.target_date|date:'M j, Y' }}
+                </div>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty workspace-empty">
+            <div class="empty-mark" aria-hidden="true">✦</div>
+            <div class="eyebrow">A CLEAR START</div>
+            <h2>Your next idea starts here.</h2>
+            <p class="muted">Create a project for a product, business, personal goal, research initiative, or any outcome you want to deliver. ShipShield will help you turn it into a plan you can track and verify.</p>
+            <a class="button" href="{% url 'projects:create' %}">
+                Create your first project <span aria-hidden="true">→</span>
+            </a>
+        </div>
+        {% endif %}
+    </section>
 </main>
 {% endblock %}
