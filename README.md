@@ -1,307 +1,566 @@
-# Telix ShipShield 🛡️
+# 🛡️ Telix ShipShield
+- Live MVP: [telix-shipshield.onrender.com](https://telix-shipshield.onrender.com)
+### Plan clearly. Execute confidently. Verify progress. Deliver with proof.
 
-**Plan clearly. Execute confidently. Verify progress. Deliver with proof.**
+**Telix ShipShield** is an early-stage project execution and delivery-assurance platform designed to help people turn ideas into structured plans, track progress, organize evidence, and understand what remains before a project is ready to deliver.
 
-Telix ShipShield is a project execution, verification, and delivery-readiness platform that transforms project ideas into structured plans, actionable milestones, trackable tasks, and evidence-backed outcomes.
+Projects rarely fail because people lack ideas. They often struggle with unclear requirements, disconnected tasks, invisible risks, missing evidence, outdated documentation, and uncertainty about whether the final result is actually ready.
 
-Built with Django for the Alan AI hackathon, ShipShield focuses on a fundamental problem: **a task marked complete is not necessarily a task that has been verified.**
+ShipShield is being built to address that gap.
 
-ShipShield connects project planning, execution tracking, risk management, evidence records, and GitHub repository inspection in one workspace. Its long-term vision is to support projects of every kind, starting with software development.
+Starting with a functional Django MVP, the long-term vision is to develop an AI-assisted platform that connects project planning, execution, repository intelligence, verification, and delivery documentation in one transparent workflow.
 
-### 🚀 Try the project
+> **The core principle:** A project should not be considered ready merely because someone says it is finished. Its progress, evidence, limitations, and verification status should be visible.
 
-- **Live application:** https://telix-shipshield.onrender.com
-- **GitHub repository:** https://github.com/SamuelNiiOdoiOddoye/Telix-Shipshield
-- **Hackathon demo and announcement:** https://x.com/oddoye_samuel/status/2114754319404949536
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Try%20ShipShield-0f766e?style=for-the-badge)](https://telix-shipshield.onrender.com)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Source%20Code-181717?style=for-the-badge&logo=github)](https://github.com/SamuelNiiOdoiOddoye/Telix-Shipshield)
+[![Python](https://img.shields.io/badge/Python-Django-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
 
-### ✨ What makes ShipShield different?
-
-Traditional project tracking often relies on status labels and progress percentages. ShipShield aims to connect those reports to acceptance criteria, evidence, identified risks, and repository findings.
-
-Its guiding principle is simple:
-
-> Reported progress is not the same as verified delivery.
-
-### 🎯 Current MVP
-
-The shipped MVP includes account registration and authentication, project creation, editable execution plans, plan validation and approval, milestone and task tracking, risk management, evidence records, and GitHub repository inspection.
-
-The implementation is an early foundation. Advanced AI-generated planning, automated test execution, and comprehensive delivery verification remain future development goals.
-
-
-## The Problem
-
-Projects often become difficult to manage when requirements are unclear, tasks lack measurable outcomes, progress updates cannot be verified, and important delivery requirements are overlooked.
-
-Software repositories introduce additional challenges: documentation becomes outdated, tests may be missing, dependencies can go unreviewed, and teams can struggle to communicate whether a project is genuinely ready for release.
-
-Telix ShipShield is being developed to address these problems through structured planning, evidence-backed execution, and transparent readiness assessments.
-
-## Our Approach
-
-Telix ShipShield is designed around five principles:
-
-- **Plan:** Transform project ideas and requirements into editable plans, milestones, tasks, and acceptance criteria.
-- **Execute:** Track task progress, dependencies, blockers, and outstanding work.
-- **Verify:** Associate completed work with evidence instead of relying exclusively on status labels.
-- **Assess:** Identify risks, missing requirements, and unresolved blockers before delivery.
-- **Deliver:** Produce a clear readiness summary and help keep project documentation aligned with the work performed.
-
-AI-generated recommendations should remain editable and subject to human review. A suggested plan is not an approved plan, and a marked-complete task is not automatically verified.
-
-## Key Capabilities
-
-The following capabilities describe the product direction; individual features are implemented incrementally.
-
-### Universal Project Management
-
-- Create and organize projects of different types.
-- Define project objectives, scope, milestones, and deliverables.
-- Generate and edit structured project plans.
-- Manage tasks, dependencies, deadlines, and blockers.
-- Define acceptance criteria for measurable completion.
-- Track project health and outstanding risks.
-
-### Evidence-Based Progress
-
-- Attach evidence to tasks and deliverables.
-- Distinguish reported progress from verified completion.
-- Identify missing evidence and unmet acceptance criteria.
-- Generate delivery-readiness assessments.
-- Explain why a project is ready, at risk, blocked, or still unverified.
-
-### AI Project Assistant
-
-- Turn project descriptions into structured plans.
-- Recommend milestones, tasks, and acceptance criteria.
-- Identify gaps, dependencies, and potential risks.
-- Help users understand project status and next steps.
-- Keep AI-generated outputs editable and subject to approval.
-
-### Software Repository Intelligence
-
-For projects with connected source repositories, ShipShield aims to provide optional software-specific checks, including:
-
-- Repository structure and documentation reviews.
-- README accuracy and completeness checks.
-- Inspection of dependency manifests and available test configuration.
-- Identification of missing project documentation and potential delivery risks.
-- Repository-readiness reports with supporting file references.
-- Proposed README updates presented as a diff for review before changes are applied.
-
-Repository analysis should distinguish observed facts from assumptions. A configured test suite does not prove that tests pass, and a repository review does not replace a complete security audit.
-
-### Delivery Documentation
-
-- Summarize completed and outstanding work.
-- Highlight unresolved blockers and delivery risks.
-- Maintain a clear record of evidence and decisions.
-- Help keep project documentation aligned with verified changes.
+**Project:** Telix ShipShield  
+**Developer:** Samuel Nii Odoi Oddoye  
+**Stage:** Hackathon MVP / early-stage development  
+**Product direction:** AI-assisted project execution, verification, and delivery assurance
 
 ---
 
-## Current Development Status
+## 📌 Table of Contents
 
-**Status:** Hackathon MVP in active development.
+- [The Problem](#-the-problem)
+- [The Vision](#-the-vision)
+- [What Works Today](#-what-works-today)
+- [The Proposed Product Workflow](#-the-proposed-product-workflow)
+- [What Makes ShipShield Different](#-what-makes-shipshield-different)
+- [Current MVP vs. Full Product](#-current-mvp-vs-full-product)
+- [AI Integration and Hackathon Context](#-ai-integration-and-hackathon-context)
+- [Technology Stack](#-technology-stack)
+- [Architecture and Engineering Principles](#-architecture-and-engineering-principles)
+- [Getting Started](#-getting-started)
+- [Testing and Verification](#-testing-and-verification)
+- [Roadmap](#-roadmap)
+- [Known Limitations](#-known-limitations)
+- [Who ShipShield Is For](#-who-shipshield-is-for)
+- [Contributing and Collaboration](#-contributing-and-collaboration)
+- [License](#-license)
 
-The current implementation includes the core project journey:
+---
 
-- Public account registration, sign-in, and sign-out.
-- User-scoped project dashboard and project creation for software, business, personal, research, and other projects.
-- Editable JSON execution plans, validation, draft persistence, and explicit approval before milestones/tasks are created.
-- Task status tracking, milestone completion, and dashboard progress calculations.
-- Project risks with severity, mitigation notes, and status updates.
-- Task evidence records with type, description, and optional URL.
-- GitHub repository connection and repository-tree/README readiness findings.
-- Explicit unverified results where tests or CI were not executed by ShipShield.
-- A shared responsive dark navy / teal interface across authentication, project, planning, and repository screens.
+## 🎯 The Problem
 
-**Known limitations:** Plan suggestions are a deterministic editable starter, not AI-generated output. The GitHub audit inspects repository metadata and files; it does not execute arbitrary repository code, run test suites, or verify CI workflow runs. Evidence currently supports links and notes; direct file uploads and a full readiness-report workflow are not part of this MVP. The Google Stitch design files were not included in the uploaded project ZIP, so the interface follows the accepted visual direction but has not been verified as a pixel-perfect match to the Stitch frames.
+Modern project work is spread across issue trackers, repositories, documents, spreadsheets, chat applications, task boards, and testing tools.
 
-## Hackathon Demo Flow
+A task may be marked complete without supporting evidence. A repository may contain a README that no longer describes the application. A milestone may be considered finished even though its acceptance criteria have not been met. A project owner may have no reliable way to distinguish reported progress from independently verified results.
 
-1. Register a fresh account and sign in.
-2. Create a project for a software, business, personal, or research outcome.
-3. Open the starter execution plan, edit the milestones/tasks/acceptance criteria, and save the draft.
-4. Approve the plan to create milestone and task records.
-5. Change task statuses, record risks and mitigations, and attach evidence links or notes.
-6. Connect a GitHub repository and run an inspection.
-7. Explain the audit findings, including why discovered test configuration is not proof that tests passed.
+These problems affect more than software development. They can appear in research, business operations, product development, personal projects, and other work that involves planning and delivery.
 
-## Technology Stack
+ShipShield explores a central question:
 
-- **Language:** Python
-- **Web framework:** Django
-- **Database:** PostgreSQL
-- **Database driver:** Psycopg
-- **Configuration:** Environment variables with `python-dotenv`
-- **Repository integration:** GitHub API tooling, planned for the integration layer
-- **Testing:** Django testing tools, pytest, and pytest-django
-- **Code quality:** Ruff
-- **Deployment preparation:** Gunicorn and WhiteNoise
+**What if a project had a structured, evidence-aware path from its initial idea to a clearly assessed delivery state?**
 
-The stack may evolve as implementation and integration requirements become clearer.
+The goal is not simply to create another task manager. It is to connect the plan, the work, the supporting evidence, and the final assessment.
 
-## Architecture
+## 💡 The Vision
 
-ShipShield uses a modular Django application structure so project planning, evidence management, AI assistance, and external integrations can evolve independently within one application.
+Telix ShipShield aims to become a universal project execution and delivery-assurance platform.
 
-```text
-Telix-Shipshield/
-├── manage.py
-├── config/
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-├── apps/
-│   ├── projects/
-│   ├── planning/
-│   ├── evidence/
-│   ├── assistant/
-│   └── integrations/
-├── templates/
-├── static/
-├── tests/
-├── requirements.txt
-├── .env.example
-├── .gitignore
-└── README.md
-```
+The intended product will help users:
 
-The exact structure may expand as the application develops.
+- Translate an idea, problem, or objective into a structured project blueprint.
+- Define milestones, tasks, dependencies, risks, and acceptance criteria.
+- Maintain context as a project evolves.
+- Track progress against the original plan.
+- Collect evidence supporting completed work.
+- Connect relevant repositories, documentation, and development tools.
+- Identify gaps between what a project claims and what its available evidence demonstrates.
+- Assess delivery readiness using transparent criteria.
+- Generate proposed documentation updates and delivery reports for human review.
+- Preserve a useful record of decisions, progress, verification, and outstanding work.
 
-## Getting Started
+Although software development is the initial focus, the underlying concepts are intended to support projects beyond coding.
+
+For example, a software project could use repository inspection and test evidence, while a research project might use milestones, source documents, and review criteria. A business initiative could track deliverables, dependencies, risks, and supporting records.
+
+The exact integrations and verification methods would depend on the project type.
+
+---
+
+## ✅ What Works Today
+
+The current MVP provides a working foundation for project planning, execution tracking, evidence recording, and preliminary GitHub repository inspection.
+
+| Capability | Current implementation |
+|---|---|
+| User accounts | Registration, sign-in, and sign-out |
+| Project management | User-scoped project creation and dashboard |
+| Execution planning | Editable, structured project plans |
+| Plan validation | Deterministic validation of submitted plans |
+| Plan approval | Draft persistence and explicit approval before creating execution records |
+| Progress tracking | Milestone completion, task status, and dashboard progress |
+| Risk management | Risk records and mitigation information |
+| Evidence management | Evidence records with types, descriptions, and optional URLs |
+| Repository inspection | GitHub repository inspection and repository-readiness findings |
+| Transparency | Findings distinguish available indicators from checks that have not been verified |
+| Interface | Responsive dark-themed user interface |
+
+These capabilities form the initial project execution workflow. They should not be confused with the complete long-term product described in the vision.
+
+### 1. Structured project planning
+
+Users can create projects and work with editable execution plans.
+
+The current planning flow uses deterministic starter-plan content rather than live LLM-generated plans. Submitted plans can be validated and saved as drafts before approval.
+
+### 2. Human-controlled execution
+
+Approval is an explicit step. A validated plan does not automatically become an approved execution plan without user action.
+
+Once approved, the system creates persistent milestone and task records that can be tracked independently.
+
+### 3. Progress, risks, and evidence
+
+Users can update task status, track milestones, record risks and mitigation information, and attach evidence records to document progress.
+
+Evidence records currently support descriptions, types, and optional URLs. They are not a comprehensive evidence-upload or verification system.
+
+### 4. Preliminary GitHub repository inspection
+
+ShipShield can connect to and inspect a GitHub repository to identify repository structure, documentation, and readiness-related indicators.
+
+The intention is to help project owners understand what can be observed about a repository without automatically treating every missing indicator as a confirmed failure.
+
+**Important:** Repository inspection is not equivalent to executing the project, running its tests, auditing its security, or proving that it is production-ready.
+
+---
+
+## 🔄 The Proposed Product Workflow
+
+The following describes the intended end-to-end experience. Some steps are supported by the current MVP; others represent planned capabilities.
+
+### Phase 1 — Understand and plan
+
+**1. Define the project**
+
+The user describes the project, its objectives, intended users, constraints, and expected outcome.
+
+**2. Generate a structured blueprint**
+
+The intended AI-assisted system converts the project description into a proposed plan containing:
+
+- Objectives and deliverables
+- Milestones and tasks
+- Dependencies and prerequisites
+- Acceptance criteria
+- Risks and mitigation strategies
+- Evidence requirements
+- Suggested verification methods
+
+*Current status: users can work with editable starter plans and validation. Full AI-generated planning is planned, not implemented.*
+
+**3. Review and approve**
+
+The user reviews the proposed plan, edits it, resolves validation issues, and explicitly approves it before it becomes the execution baseline.
+
+Human approval is intended to remain central to consequential project decisions.
+
+### Phase 2 — Execute and track
+
+**4. Manage work against the plan**
+
+Users update task and milestone status, record risks, and maintain the project as requirements change.
+
+The longer-term product should also help identify blocked work, dependencies that threaten deadlines, and discrepancies between planned and actual progress.
+
+**5. Collect evidence**
+
+Completed work should be associated with useful supporting evidence, such as documents, links, test results, review records, or other relevant artifacts.
+
+The system should distinguish evidence that has merely been supplied from evidence that has actually been checked.
+
+### Phase 3 — Inspect and assess
+
+**6. Connect relevant tools and inspect available information**
+
+For software projects, this could include repository metadata, project documentation, configuration files, test definitions, and—when authorized integrations are available—actual test or CI results.
+
+For non-software projects, the relevant sources would depend on the work being assessed.
+
+**7. Evaluate delivery readiness**
+
+The intended readiness assessment would consider criteria such as:
+
+- Completion of required milestones
+- Acceptance criteria and supporting evidence
+- Outstanding tasks and dependencies
+- Unresolved risks
+- Documentation completeness
+- Verification results and their provenance
+- Explicitly unverified requirements
+
+A readiness assessment should explain *why* a project receives a particular status, rather than provide an unexplained score.
+
+### Phase 4 — Document and deliver
+
+**8. Prepare a delivery package**
+
+The full product is intended to produce a clear summary of what was planned, what was completed, what was verified, what remains unresolved, and what should happen next.
+
+Future documentation tools could propose README changes, release notes, handover documents, or delivery reports. Changes should be reviewable and require appropriate approval before being applied.
+
+**The distinction matters:** the current MVP implements parts of planning, execution tracking, evidence recording, and repository inspection. The complete AI-assisted, evidence-verified delivery workflow remains the product vision.
+
+---
+
+## 🌟 What Makes ShipShield Different?
+
+### Evidence over assumptions
+
+A status label alone is not proof. ShipShield's direction is to connect reported progress with supporting evidence and make verification status explicit.
+
+### Human approval over blind automation
+
+Plans should be editable. Generated recommendations should be reviewable. Significant actions should have clear approval boundaries.
+
+### One project context
+
+The long-term goal is to maintain a coherent understanding of the project's objectives, requirements, work, risks, evidence, and delivery state rather than scattering these across disconnected tools.
+
+### Verification with clear limitations
+
+A missing result should not automatically be reported as a failed result. A repository inspection should not be described as a successful test run. A supplied link should not be described as independently verified evidence unless it has actually been checked.
+
+### Software-first, not software-only
+
+The initial implementation focuses on a practical software-oriented workflow, but the broader model is designed around projects, milestones, tasks, risks, and evidence—concepts that can apply across different domains.
+
+---
+
+## 🧭 Current MVP vs. Full Product
+
+| Area | Current MVP | Intended future capability |
+|---|---|---|
+| Planning | Editable deterministic starter plans and validation | AI-assisted project understanding and blueprint generation |
+| Approval | Explicit approval before execution records are created | Richer review, change history, and approval workflows |
+| Execution | Persistent tasks, milestones, and progress tracking | More advanced dependency, blocker, and schedule intelligence |
+| Evidence | Typed evidence records with descriptions and optional URLs | Broader evidence collection, validation, and provenance |
+| GitHub | Preliminary repository inspection | Deeper repository and development-workflow integrations |
+| Testing | Test code and development checks exist; results must be assessed per run and commit | Authorized test execution and verified results |
+| Readiness | Preliminary repository findings | Explainable, evidence-based delivery-readiness assessments |
+| Documentation | Existing project documentation and repository findings | Reviewable documentation-change proposals and approved updates |
+| AI | Full AI planning is not yet implemented | AI-assisted planning, contextual recommendations, and project-aware assistance |
+| Project memory | Persistent application data for existing project records | Richer long-term project context and decision history |
+
+This comparison is intended to make the boundary between the current implementation and the proposed product explicit.
+
+---
+
+## 🤖 AI Integration and Hackathon Context
+
+AI-assisted planning is an important part of the ShipShield vision. During the hackathon, however, access to the Alan AI APIs needed for the intended integration was not available to me.
+
+As a result, the current MVP uses deterministic starter-plan content and validation rather than claiming to generate plans through Alan AI or another live LLM integration.
+
+This is an important engineering distinction:
+
+- **Implemented:** editable plan data, validation, draft persistence, and explicit approval.
+- **Not yet implemented:** full LLM-driven project-plan generation through Alan AI.
+- **Planned:** AI-assisted project understanding, plan generation, contextual recommendations, and richer project-aware workflows.
+
+The absence of that API integration does not mean the current planning foundation is an AI system. It means the MVP establishes the workflow and data structures on which that capability can later be built.
+
+The intended integration should preserve the product's core principles: editable outputs, validation, human review, and transparent reporting.
+
+---
+
+## 🧰 Technology Stack
+
+The current project is built around a Python/Django web application.
+
+| Technology | Role |
+|---|---|
+| Python | Application logic and backend development |
+| Django | Web framework, application structure, authentication, and request handling |
+| PostgreSQL | Relational database |
+| Psycopg | PostgreSQL database connectivity |
+| GitHub API tooling | Repository inspection and integration functionality |
+| Django testing / pytest tooling | Automated test development and execution |
+| Ruff | Python linting and code-quality checks |
+| Gunicorn | Application serving in deployment |
+| WhiteNoise | Static-file serving support |
+| HTML, CSS, and JavaScript | Web interface |
+
+The codebase is organized as a modular Django application, with areas for projects, planning, evidence, assistant-related functionality, and integrations.
+
+The architecture is intended to support incremental development without requiring a premature move to a distributed system.
+
+---
+
+## 🏗️ Architecture and Engineering Principles
+
+### Modular monolith first
+
+ShipShield currently follows a Django modular-monolith approach. This keeps the application relatively straightforward to develop, test, and deploy while allowing distinct responsibilities to live in separate application modules.
+
+More complex infrastructure should be introduced when the product's requirements justify it.
+
+### Persistent, structured project data
+
+Project plans and execution records should be represented as structured application data rather than relying entirely on free-form text.
+
+This provides a foundation for validation, progress tracking, future integrations, and reporting.
+
+### Validate before executing
+
+The plan workflow separates editing, validation, and approval. This helps prevent unreviewed or invalid plans from being treated as approved execution baselines.
+
+### Be explicit about what was verified
+
+ShipShield should distinguish between:
+
+- **Planned:** a future capability or intended action.
+- **Reported:** information supplied by a user or external system.
+- **Observed:** information actually retrieved or inspected.
+- **Verified:** a specific check was executed and produced a recorded result.
+- **Unverified:** available information is insufficient to establish the result.
+
+These categories are especially important for repository health, test results, and delivery readiness.
+
+### Security and ownership
+
+User-specific project operations should respect project ownership and authentication boundaries. Integrations should use appropriately scoped credentials and avoid executing arbitrary code without a deliberate, isolated, and authorized execution design.
+
+### Incremental delivery
+
+The project is being developed in stages: establish the core workflow, validate it, improve its reliability, and then add more advanced AI and integration capabilities.
+
+---
+
+## 🚀 Getting Started
+
+You can explore the deployed MVP or run the application locally.
 
 ### Prerequisites
 
-Install the following before running the application:
-
-- Python 3.13 or another supported Python version.
-- PostgreSQL.
-- Git.
-- PowerShell on Windows, or an equivalent terminal.
+- Python
+- PostgreSQL
+- Git
+- A GitHub account if you want to explore repository integration
 
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/SamuelNiiOdoiOddoye/Telix-Shipshield.git
 cd Telix-Shipshield
 ```
 
-If you're already working in the local project directory, skip this step.
-
 ### 2. Create and activate a virtual environment
 
-On Windows PowerShell:
+**Windows PowerShell**
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
+**macOS / Linux**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
 ### 3. Install dependencies
 
-```powershell
-python -m pip install --upgrade pip
+Use the dependency file included in the repository:
+
+```bash
 pip install -r requirements.txt
 ```
 
+If the dependency-management files have changed in a newer revision, follow the instructions in the current repository instead.
+
 ### 4. Configure environment variables
 
-Create a local `.env` file based on `.env.example`.
+Configure the Django secret key, database connection, allowed hosts, and other settings required by the project's current configuration.
 
-```powershell
-Copy-Item .env.example .env
-```
+Use any supplied example environment file as the source of truth. Do not commit real secrets, database passwords, or GitHub credentials.
 
-Configure the following values in `.env`:
+### 5. Apply database migrations
 
-```dotenv
-SECRET_KEY=your-generated-django-secret
-DEBUG=True
-ALLOWED_HOSTS=127.0.0.1,localhost
-
-DB_NAME=telix_shipshield
-DB_USER=shipshield_app
-DB_PASSWORD=your-local-database-password
-DB_HOST=127.0.0.1
-DB_PORT=5432
-```
-
-Replace the example values with your actual local configuration. Generate a strong Django secret key and use a strong PostgreSQL password.
-
-**Never commit `.env` or expose database credentials and secret keys in source code, screenshots, issue reports, or public repositories.** Use `.env.example` to document required variables without including real secrets.
-
-### 5. Create the PostgreSQL database
-
-Once PostgreSQL is installed and running, create a dedicated application role and database using PostgreSQL's administrative tools.
-
-For example, from a PostgreSQL administrative session:
-
-```sql
-CREATE USER shipshield_app WITH PASSWORD 'replace_with_a_strong_password';
-CREATE DATABASE telix_shipshield OWNER shipshield_app;
-```
-
-Use the same database name, username, and password in `.env`. Execute these commands only if the role and database do not already exist. For an existing setup, inspect it first rather than creating duplicate resources.
-
-### 6. Run database migrations
-
-```powershell
+```bash
 python manage.py migrate
 ```
 
-### 7. Start the development server
+### 6. Start the development server
 
-```powershell
-python manage.py runserver 9000
+```bash
+python manage.py runserver
 ```
 
-Open [http://127.0.0.1:9000/](http://127.0.0.1:9000/) in your browser. The root redirects to your workspace after sign-in. Registration is available at `/projects/register/`.
+Open the local address printed by Django in your terminal.
+
+For the most reliable setup instructions, consult the configuration and dependency files in the repository at the commit you are running.
 
 ---
 
-## Development Principles
+## 🧪 Testing and Verification
 
-ShipShield is being developed with the following principles in mind:
+Testing is an important part of ShipShield's development, but test availability, local execution, and hosted CI results are different things.
 
-1. **Evidence over assumptions:** distinguish claimed progress from verified results.
-2. **Human approval:** require review before approving generated plans or applying consequential changes.
-3. **Transparency:** explain readiness findings and identify the evidence supporting them.
-4. **Security by design:** keep credentials server-side, protect connected repositories, and minimize unnecessary permissions.
-5. **Universal applicability:** support general projects, with software-specific functionality enabled when relevant.
-6. **Incremental delivery:** prioritize working, tested workflows over superficial feature counts.
-7. **Honest reporting:** never represent an unrun test, unverified integration, or unimplemented feature as complete.
+A test file in a repository does not, by itself, prove that the tests passed. Similarly, a failed workflow on a different branch does not establish that the submitted `main` commit failed.
 
-## Roadmap
+For reproducible verification, record:
 
-The development roadmap prioritizes a usable foundation before more advanced integrations.
+1. The exact Git commit being assessed.
+2. The command executed.
+3. The test or check result.
+4. Any relevant environment requirements.
+5. Whether the result came from a local run or an automated workflow.
 
-- [ ] Establish the Django and PostgreSQL foundation.
-- [ ] Implement project creation and project overview pages.
-- [ ] Add milestones, tasks, dependencies, and acceptance criteria.
-- [ ] Support task status updates and project progress tracking.
-- [ ] Implement evidence attachments and verification states.
-- [ ] Generate transparent delivery-readiness reports.
-- [ ] Integrate Alan AI for structured planning and project assistance.
-- [ ] Add optional GitHub repository analysis.
-- [ ] Propose README updates with reviewable diffs and explicit approval.
-- [ ] Add automated tests, security checks, and deployment configuration.
-- [ ] Prepare a working demonstration covering software and non-software projects.
+Example commands, depending on the project's installed dependencies and configuration:
 
-Roadmap items should be checked off only when the relevant functionality has been implemented and verified.
+```bash
+python manage.py check
+python manage.py test
+```
 
-## Project Vision
+If pytest is configured for the relevant tests, use the repository's documented pytest command as well.
 
-Telix ShipShield aims to make project delivery more predictable and trustworthy by connecting plans, execution, evidence, and readiness in one place.
-
-The goal is not merely to show that work has been marked complete. It is to help people understand what has actually been delivered, what supports that conclusion, and what still needs attention.
-
-**Telix ShipShield — Build with direction. Deliver with confidence.**
+**Current verification statement:** The project contains test and development-check tooling, but a passing automated CI result should only be claimed when a successful run for the relevant commit is available. Repository inspection by ShipShield does not itself execute the application's test suite.
 
 ---
 
-## License
+## 🗺️ Roadmap
 
-The project's license has not yet been specified. Licensing terms will be added once the intended distribution and reuse policy has been decided.
+The roadmap separates the current foundation from future work. It is not a claim that every item below has been completed.
+
+### Foundation and MVP
+
+- [x] Establish the Django application and core project structure.
+- [x] Implement user authentication.
+- [x] Support project creation and a user-scoped dashboard.
+- [x] Support editable execution plans and validation.
+- [x] Persist drafts and require explicit approval before creating execution records.
+- [x] Track milestones, tasks, and progress.
+- [x] Record risks, mitigation information, and evidence.
+- [x] Implement preliminary GitHub repository inspection.
+- [x] Make repository findings distinguish observed indicators from unverified results.
+- [ ] Complete and document a reproducible verification run for the release candidate.
+- [ ] Improve consistency between documentation, roadmap status, and the current codebase.
+
+### Next engineering priorities
+
+- [ ] Strengthen automated testing and record reproducible results.
+- [ ] Review error handling, authorization boundaries, and integration failure states.
+- [ ] Improve repository-inspection accuracy and explainability.
+- [ ] Add screenshots and a clear, repeatable product demonstration.
+- [ ] Improve the distinction between user-supplied evidence and independently verified results.
+- [ ] Document deployment configuration and operational limitations.
+
+### AI and product capabilities
+
+- [ ] Integrate an available AI API for project-plan generation.
+- [ ] Validate AI-generated plans before presenting them for approval.
+- [ ] Introduce richer project context and decision history.
+- [ ] Expand project templates and support for different project types.
+- [ ] Develop evidence-aware readiness assessments with explicit criteria.
+- [ ] Explore authorized test execution in an isolated environment.
+- [ ] Expand repository and development-tool integrations.
+- [ ] Propose documentation updates as reviewable changes.
+- [ ] Add delivery summaries and handover reports.
+- [ ] Develop an audit trail for important project and verification decisions.
+
+### Longer-term direction
+
+- [ ] Support richer integrations with development and project-management tools.
+- [ ] Improve dependency, risk, and blocker analysis.
+- [ ] Support configurable workflows for teams and organizations.
+- [ ] Explore team collaboration and role-based approval workflows.
+- [ ] Develop a more comprehensive delivery-assurance system for software and non-software projects.
+
+Roadmap items should be checked off only when the corresponding capability is implemented and its status is supported by the code or documented verification.
+
+---
+
+## ⚠️ Known Limitations
+
+ShipShield is an early-stage MVP, not a fully realized autonomous delivery platform.
+
+Current limitations include:
+
+- **AI planning:** Full LLM-powered plan generation is not implemented in the current MVP.
+- **Repository verification:** GitHub inspection does not execute arbitrary repository code, run the project's tests, or independently establish that CI passed.
+- **Security assurance:** Repository findings are not a comprehensive security audit.
+- **Evidence handling:** Evidence records currently focus on descriptions, types, and optional URLs rather than a full artifact-ingestion and verification pipeline.
+- **Delivery readiness:** The complete evidence-based delivery-readiness workflow remains a future capability.
+- **Documentation automation:** Automatically proposing, reviewing, and applying README changes is part of the longer-term vision, not a claim about current functionality.
+- **Verification status:** Local test results, hosted CI runs, and repository inspection findings must be assessed separately.
+- **Production maturity:** The existence of a deployed demonstration does not establish production-grade reliability, scalability, or security.
+
+These limitations define the current development boundary and help guide the next engineering priorities.
+
+---
+
+## 👥 Who ShipShield Is For
+
+### Developers and engineering teams
+
+Organize implementation work, clarify acceptance criteria, track risks, and understand which results have actually been verified.
+
+### Independent builders and founders
+
+Turn ideas into manageable execution plans and communicate project status with clearer supporting evidence.
+
+### Project owners and teams outside software
+
+Apply structured planning, milestone tracking, risk management, and evidence-based progress reporting to work that is not primarily code-driven.
+
+### Reviewers, recruiters, and stakeholders
+
+Understand the intended scope of a project, its current implementation, the evidence available, and the work that remains—without confusing product vision with completed functionality.
+
+---
+
+## 🤝 Contributing and Collaboration
+
+ShipShield is being developed incrementally, and constructive feedback is valuable.
+
+Potential areas for contribution include:
+
+- Django architecture and backend engineering
+- Test coverage and reliability
+- AI-assisted planning
+- GitHub and other tool integrations
+- Evidence and verification models
+- UI/UX improvements
+- Documentation and onboarding
+- Security and deployment practices
+
+Before proposing a contribution, please distinguish between existing functionality, a bug in the current implementation, and a feature that belongs to the future roadmap.
+
+Issues and pull requests should explain the problem, expected behavior, and relevant evidence where possible.
+
+---
+
+## 📄 License
+
+A license should be added explicitly before the project is presented as open source for reuse or redistribution. Until a license is included in the repository, do not assume that the source code is available under an open-source license.
+
+---
+
+## 👨🏽‍💻 About the Developer
+
+**Samuel Nii Odoi Oddoye** is a software developer based in Accra, Ghana, building projects across Python, Django, full-stack development, testing, and AI-assisted software workflows.
+
+Telix ShipShield is an exploration of how structured project execution, transparent verification, and AI-assisted decision-making can work together in a practical product.
+
+The current MVP establishes the foundation. The longer-term challenge is to make the system increasingly useful without overstating what it knows, what it has checked, or what it can safely automate.
+
+**Connect and explore:**
+
+- GitHub: [SamuelNiiOdoiOddoye](https://github.com/SamuelNiiOdoiOddoye)
+- Project repository: [Telix ShipShield](https://github.com/SamuelNiiOdoiOddoye/Telix-Shipshield)
+- Live MVP: [telix-shipshield.onrender.com](https://telix-shipshield.onrender.com)
+- Project demo post: [View the demonstration on X](https://x.com/oddoye_samuel/status/2114754319404949536)
+
+---
+
+*Telix ShipShield — a project execution foundation today, with a vision for evidence-aware delivery assurance tomorrow.*
